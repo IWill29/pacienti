@@ -8,11 +8,8 @@ export default function Home() {
       <main className="mx-auto flex min-h-full max-w-5xl flex-col px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         <div className="mx-auto w-full max-w-3xl space-y-8">
           <header className="space-y-2 text-center sm:text-left">
-            <p className="text-sm font-medium uppercase tracking-wider text-indigo-600">
-              Ārsta palīgs
-            </p>
             <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
-              Pacienti
+              Dokumentu kopsavilkums
             </h1>
             <p className="text-base text-zinc-600">
               Izvēlieties formu, aizpildiet laukus un ģenerējiet AI
