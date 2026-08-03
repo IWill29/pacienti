@@ -18,7 +18,7 @@ export function DocCheckbox({
   return (
     <label
       htmlFor={id}
-      className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[13px] leading-snug text-zinc-900"
+      className="inline-flex max-w-full cursor-pointer items-start gap-1.5 text-[13px] leading-snug text-zinc-900"
     >
       <input
         id={id}
@@ -26,9 +26,9 @@ export function DocCheckbox({
         checked={checked}
         disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
-        className="h-3.5 w-3.5 shrink-0 rounded border-zinc-400 text-indigo-600 focus:ring-indigo-500"
+        className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-zinc-400 text-indigo-600 focus:ring-indigo-500"
       />
-      <span>{label}</span>
+      <span className="min-w-0 break-words">{label}</span>
     </label>
   );
 }
@@ -55,7 +55,7 @@ export function DocRadio({
   return (
     <label
       htmlFor={id}
-      className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[13px] leading-snug text-zinc-900"
+      className="inline-flex max-w-full cursor-pointer items-start gap-1.5 text-[13px] leading-snug text-zinc-900"
     >
       <input
         id={id}
@@ -65,9 +65,9 @@ export function DocRadio({
         checked={checked}
         disabled={disabled}
         onChange={() => onChange(value)}
-        className="h-3.5 w-3.5 shrink-0 border-zinc-400 text-indigo-600 focus:ring-indigo-500"
+        className="mt-0.5 h-3.5 w-3.5 shrink-0 border-zinc-400 text-indigo-600 focus:ring-indigo-500"
       />
-      <span>{label}</span>
+      <span className="min-w-0 break-words">{label}</span>
     </label>
   );
 }
@@ -97,7 +97,7 @@ export function DocInlineInput({
       disabled={disabled}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
-      className={`doc-inline-input ${className}`}
+      className={`doc-inline-input max-w-full ${className}`}
     />
   );
 }

@@ -49,7 +49,7 @@ export function SummaryPanel({
       )}
 
       {summary && (
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-[0_4px_20px_-2px_rgb(0_0_0_/_0.08)]">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-[0_4px_20px_-2px_rgb(0_0_0_/_0.08)] sm:p-6">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold text-zinc-900">Kopsavilkums</h2>
             <button
@@ -125,10 +125,10 @@ export function FormShell({
 
   return (
     <div
-      className={`mx-auto w-full space-y-6 ${wide ? "max-w-6xl" : "max-w-4xl"}`}
+      className={`mx-auto w-full min-w-0 space-y-6 ${wide ? "max-w-6xl" : "max-w-4xl"}`}
     >
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl lg:text-4xl">
           {title}
         </h1>
         <p className="text-base text-zinc-600">{subtitle}</p>

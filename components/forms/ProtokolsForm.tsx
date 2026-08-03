@@ -36,12 +36,12 @@ export function ProtokolsForm() {
       title="Protokols (uzn.nod.1)"
       subtitle="Psihiatriskā apskate — Neatliekamās medicīniskās palīdzības un pacientu uzņemšanas nodaļā."
     >
-      <article className="doc-sheet">
+      <article className="doc-sheet min-w-0">
         <header className="doc-header mb-6 text-center">
-          <h2 className="text-lg font-bold uppercase tracking-wide text-zinc-900">
+          <h2 className="text-base font-bold uppercase tracking-wide text-zinc-900 sm:text-lg">
             PSIHIATRISKĀ APSKATE
           </h2>
-          <div className="mt-3 text-[13px] leading-relaxed text-zinc-800">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-[13px] leading-relaxed text-zinc-800">
             Neatliekamās medicīniskās palīdzības un pacientu uzņemšanas nodaļā
             <DocInlineInput
               id="gads"
@@ -80,118 +80,134 @@ export function ProtokolsForm() {
           </div>
         </header>
 
-        <table className="doc-table mb-6 w-full border-collapse text-[13px]">
+        <div className="doc-table-wrap mb-6">
+        <table className="doc-table doc-table--patient doc-table--stacked w-full border-collapse text-[13px]">
           <tbody>
             <tr>
-              <td colSpan={6} className="doc-table-section">
+              <td colSpan={2} className="doc-table-section">
                 I Ziņas par pacientu
               </td>
             </tr>
             <tr>
-              <td className="doc-table-cell align-top">
+              <td className="doc-table-cell doc-table-cell--label align-top">
                 1. Pacients stacionēts
+              </td>
+              <td className="doc-table-cell align-top">
                 <DocInlineInput
                   id="stacionets"
                   value={data.stacionets}
                   onChange={(v) => update("stacionets", v)}
-                  className="mt-1 w-full"
+                  className="w-full"
                 />
+                <div className="mt-2">
+                  ar nosūtījumu no:
+                  <DocInlineInput
+                    id="nosutijums-no"
+                    value={data.nosutijumsNo}
+                    onChange={(v) => update("nosutijumsNo", v)}
+                    className="mt-1 w-full"
+                  />
+                </div>
+                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                  <DocCheckbox id="nos-psih" label="psihiatra" checked={data.nosutijumsTips.psihiatrs} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, psihiatrs: c })} />
+                  <DocCheckbox id="nos-ga" label="ģimenes ārsta" checked={data.nosutijumsTips.gimenesArsts} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, gimenesArsts: c })} />
+                  <DocCheckbox id="nos-nmpd" label="NMPD" checked={data.nosutijumsTips.nmpd} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, nmpd: c })} />
+                  <DocCheckbox id="bez-nos" label="bez nosūtījuma" checked={data.nosutijumsTips.bezNosutijuma} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, bezNosutijuma: c })} />
+                  <DocCheckbox id="ar-policiju" label="ar policiju" checked={data.nosutijumsTips.arPoliciju} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, arPoliciju: c })} />
+                  <DocCheckbox id="pirmreizeji" label="pirmreizēji" checked={data.nosutijumsTips.pirmreizeji} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, pirmreizeji: c })} />
+                  <DocCheckbox id="atkartoti" label="atkārtoti" checked={data.nosutijumsTips.atkartoti} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, atkartoti: c })} />
+                </div>
+                <div className="mt-2">
+                  pārvests no:
+                  <DocInlineInput id="parvests-no" value={data.nosutijumsTips.parvestsNo} onChange={(v) => update("nosutijumsTips", { ...data.nosutijumsTips, parvestsNo: v })} className="mt-1 w-full" />
+                </div>
               </td>
-              <td className="doc-table-cell align-top" colSpan={2}>
-                ar nosūtījumu no:
-                <DocInlineInput
-                  id="nosutijums-no"
-                  value={data.nosutijumsNo}
-                  onChange={(v) => update("nosutijumsNo", v)}
-                  className="mt-1 w-full"
-                />
-              </td>
-              <td className="doc-table-cell align-top">
-                <DocCheckbox id="nos-psih" label="psihiatra" checked={data.nosutijumsTips.psihiatrs} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, psihiatrs: c })} />
-                <DocCheckbox id="nos-ga" label="ģimenes ārsta" checked={data.nosutijumsTips.gimenesArsts} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, gimenesArsts: c })} />
-                <DocCheckbox id="nos-nmpd" label="NMPD" checked={data.nosutijumsTips.nmpd} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, nmpd: c })} />
-              </td>
-              <td className="doc-table-cell align-top">
+            </tr>
+            <tr>
+              <td className="doc-table-cell doc-table-cell--label align-top">
                 2. Pacients
-                <div className="mt-1 space-y-1">
+              </td>
+              <td className="doc-table-cell align-top">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
                   <DocCheckbox id="strada" label="strādā" checked={data.strada} onChange={(c) => update("strada", c)} />
                   <DocCheckbox id="nestrada" label="nestrādā" checked={data.nestrada} onChange={(c) => update("nestrada", c)} />
                   <DocCheckbox id="invaliditate" label="ir invaliditāte" checked={data.invaliditate} onChange={(c) => update("invaliditate", c)} />
                 </div>
               </td>
-              <td className="doc-table-cell align-top">
-                4. Pacients dzīvo
-                <div className="mt-1 space-y-1">
-                  <DocCheckbox id="dz-viens" label="viens" checked={data.dzivo.viens} onChange={(c) => update("dzivo", { ...data.dzivo, viens: c })} />
-                  <DocCheckbox id="dz-gimene" label="ģimenē" checked={data.dzivo.gimene} onChange={(c) => update("dzivo", { ...data.dzivo, gimene: c })} />
-                  <DocCheckbox id="dz-sac" label="SAC" checked={data.dzivo.sac} onChange={(c) => update("dzivo", { ...data.dzivo, sac: c })} />
-                  <span className="text-[13px]">cits:</span>
-                  <DocInlineInput id="dz-cits" value={data.dzivo.cits} onChange={(v) => update("dzivo", { ...data.dzivo, cits: v })} className="w-full" />
-                </div>
-              </td>
             </tr>
             <tr>
-              <td className="doc-table-cell">
-                <DocCheckbox id="bez-nos" label="bez nosūtījuma" checked={data.nosutijumsTips.bezNosutijuma} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, bezNosutijuma: c })} />
-              </td>
-              <td className="doc-table-cell" colSpan={2}>
+              <td className="doc-table-cell doc-table-cell--label align-top">
                 3. Pacients ambulatoro psihiatru
-                <div className="mt-1 space-y-1">
+              </td>
+              <td className="doc-table-cell align-top">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
                   <DocCheckbox id="amb-ne" label="neapmeklē" checked={data.ambulatoraisPsihiatrs.neapmekle} onChange={(c) => update("ambulatoraisPsihiatrs", { ...data.ambulatoraisPsihiatrs, neapmekle: c })} />
                   <DocCheckbox id="amb-nereg" label="apmeklē neregulāri" checked={data.ambulatoraisPsihiatrs.neregulari} onChange={(c) => update("ambulatoraisPsihiatrs", { ...data.ambulatoraisPsihiatrs, neregulari: c })} />
                   <DocCheckbox id="amb-reg" label="apmeklē regulāri" checked={data.ambulatoraisPsihiatrs.regulari} onChange={(c) => update("ambulatoraisPsihiatrs", { ...data.ambulatoraisPsihiatrs, regulari: c })} />
                 </div>
               </td>
-              <td className="doc-table-cell">
-                <DocCheckbox id="ar-policiju" label="ar policiju" checked={data.nosutijumsTips.arPoliciju} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, arPoliciju: c })} />
+            </tr>
+            <tr>
+              <td className="doc-table-cell doc-table-cell--label align-top">
+                4. Pacients dzīvo
               </td>
-              <td className="doc-table-cell">
-                <DocCheckbox id="pirmreizeji" label="pirmreizēji" checked={data.nosutijumsTips.pirmreizeji} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, pirmreizeji: c })} />
-              </td>
-              <td className="doc-table-cell">
-                <DocCheckbox id="atkartoti" label="atkārtoti" checked={data.nosutijumsTips.atkartoti} onChange={(c) => update("nosutijumsTips", { ...data.nosutijumsTips, atkartoti: c })} />
+              <td className="doc-table-cell align-top">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  <DocCheckbox id="dz-viens" label="viens" checked={data.dzivo.viens} onChange={(c) => update("dzivo", { ...data.dzivo, viens: c })} />
+                  <DocCheckbox id="dz-gimene" label="ģimenē" checked={data.dzivo.gimene} onChange={(c) => update("dzivo", { ...data.dzivo, gimene: c })} />
+                  <DocCheckbox id="dz-sac" label="SAC" checked={data.dzivo.sac} onChange={(c) => update("dzivo", { ...data.dzivo, sac: c })} />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span>cits:</span>
+                  <DocInlineInput id="dz-cits" value={data.dzivo.cits} onChange={(v) => update("dzivo", { ...data.dzivo, cits: v })} className="min-w-0 flex-1" />
+                </div>
               </td>
             </tr>
             <tr>
-              <td className="doc-table-cell" colSpan={2}>
-                pārvests no:
-                <DocInlineInput id="parvests-no" value={data.nosutijumsTips.parvestsNo} onChange={(v) => update("nosutijumsTips", { ...data.nosutijumsTips, parvestsNo: v })} className="mt-1 w-full" />
-              </td>
-              <td className="doc-table-cell" colSpan={2}>
+              <td className="doc-table-cell doc-table-cell--label align-top">
                 5. Hroniskas slimības
-                <div className="mt-1 space-y-1">
+              </td>
+              <td className="doc-table-cell align-top">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
                   <DocCheckbox id="hs-noliedz" label="noliedz" checked={data.hroniskasSlimibas.noliedz} onChange={(c) => update("hroniskasSlimibas", { ...data.hroniskasSlimibas, noliedz: c })} />
                   <DocCheckbox id="hs-ir" label="ir, kādas:" checked={data.hroniskasSlimibas.ir} onChange={(c) => update("hroniskasSlimibas", { ...data.hroniskasSlimibas, ir: c })} />
-                  {data.hroniskasSlimibas.ir && (
-                    <DocInlineInput id="hs-apr" value={data.hroniskasSlimibas.apraksts} onChange={(v) => update("hroniskasSlimibas", { ...data.hroniskasSlimibas, apraksts: v })} className="w-full" />
-                  )}
                 </div>
-              </td>
-              <td className="doc-table-cell" colSpan={2}>
-                6. Lietotās zāles
-                <div className="mt-1 space-y-1">
-                  <DocCheckbox id="lz-nav" label="nav" checked={data.lietotasZales.nav} onChange={(c) => update("lietotasZales", { ...data.lietotasZales, nav: c })} />
-                  <DocCheckbox id="lz-ir" label="ir, kādas:" checked={data.lietotasZales.ir} onChange={(c) => update("lietotasZales", { ...data.lietotasZales, ir: c })} />
-                  {data.lietotasZales.ir && (
-                    <DocInlineInput id="lz-apr" value={data.lietotasZales.apraksts} onChange={(v) => update("lietotasZales", { ...data.lietotasZales, apraksts: v })} className="w-full" />
-                  )}
-                </div>
+                {data.hroniskasSlimibas.ir && (
+                  <DocInlineInput id="hs-apr" value={data.hroniskasSlimibas.apraksts} onChange={(v) => update("hroniskasSlimibas", { ...data.hroniskasSlimibas, apraksts: v })} className="mt-2 w-full" />
+                )}
               </td>
             </tr>
             <tr>
-              <td className="doc-table-cell" colSpan={6}>
+              <td className="doc-table-cell doc-table-cell--label align-top">
+                6. Lietotās zāles
+              </td>
+              <td className="doc-table-cell align-top">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  <DocCheckbox id="lz-nav" label="nav" checked={data.lietotasZales.nav} onChange={(c) => update("lietotasZales", { ...data.lietotasZales, nav: c })} />
+                  <DocCheckbox id="lz-ir" label="ir, kādas:" checked={data.lietotasZales.ir} onChange={(c) => update("lietotasZales", { ...data.lietotasZales, ir: c })} />
+                </div>
+                {data.lietotasZales.ir && (
+                  <DocInlineInput id="lz-apr" value={data.lietotasZales.apraksts} onChange={(v) => update("lietotasZales", { ...data.lietotasZales, apraksts: v })} className="mt-2 w-full" />
+                )}
+              </td>
+            </tr>
+            <tr>
+              <td className="doc-table-cell doc-table-cell--label align-top">
                 7. Suicīda mēģinājumi
-                <div className="mt-1 flex flex-wrap gap-4">
+              </td>
+              <td className="doc-table-cell align-top">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
                   <DocCheckbox id="sm-nav" label="nav" checked={data.suicidaMeginajumi.nav} onChange={(c) => update("suicidaMeginajumi", { ...data.suicidaMeginajumi, nav: c })} />
                   <DocCheckbox id="sm-ir" label="ir, kādi:" checked={data.suicidaMeginajumi.ir} onChange={(c) => update("suicidaMeginajumi", { ...data.suicidaMeginajumi, ir: c })} />
-                  {data.suicidaMeginajumi.ir && (
-                    <DocInlineInput id="sm-apr" value={data.suicidaMeginajumi.apraksts} onChange={(v) => update("suicidaMeginajumi", { ...data.suicidaMeginajumi, apraksts: v })} className="min-w-[200px] flex-1" />
-                  )}
                 </div>
+                {data.suicidaMeginajumi.ir && (
+                  <DocInlineInput id="sm-apr" value={data.suicidaMeginajumi.apraksts} onChange={(v) => update("suicidaMeginajumi", { ...data.suicidaMeginajumi, apraksts: v })} className="mt-2 w-full" />
+                )}
               </td>
             </tr>
           </tbody>
         </table>
+        </div>
 
         <DocSectionTitle>II Īsa anamnēze/katamnēze:</DocSectionTitle>
         <DocTextArea id="anamneze" value={data.anamneze} onChange={(v) => update("anamneze", v)} rows={5} />
@@ -207,7 +223,7 @@ export function ProtokolsForm() {
 
         <div className="doc-subsection">
           <div className="doc-label mb-2">2. Orientācija</div>
-          <table className="doc-table w-full border-collapse text-[13px]">
+          <table className="doc-table doc-table--compact doc-table--stacked w-full border-collapse text-[13px]">
             <tbody>
               {(["laika", "vieta", "personalba"] as const).map((dim) => (
                 <tr key={dim}>
@@ -391,7 +407,7 @@ export function ProtokolsForm() {
               />
             ))}
           </div>
-          <div className="mt-2 flex items-center gap-2 text-[13px]">
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px]">
             nav gulējis
             <DocInlineInput
               id="miegs-naktis"
@@ -430,7 +446,7 @@ export function ProtokolsForm() {
         </DocFieldBlock>
         <DocFieldBlock label="Cita simptomātika:">
           <DocTextArea id="neiro-cita" value={data.neirologiskais.citaSimptomatika} onChange={(v) => update("neirologiskais", { ...data.neirologiskais, citaSimptomatika: v })} rows={2} />
-          <div className="mt-2 flex gap-4">
+          <div className="mt-2 flex flex-wrap gap-4">
             <DocCheckbox id="neiro-nen" label="nenovēro" checked={data.neirologiskais.nenovēro} onChange={(c) => update("neirologiskais", { ...data.neirologiskais, nenovēro: c })} />
             <DocCheckbox id="neiro-ir" label="ir" checked={data.neirologiskais.ir} onChange={(c) => update("neirologiskais", { ...data.neirologiskais, ir: c })} />
           </div>
@@ -512,7 +528,7 @@ export function ProtokolsForm() {
         </div>
 
         <DocSectionTitle>XIII Tālākā taktika</DocSectionTitle>
-        <div className="space-y-2 text-[13px]">
+        <div className="doc-checkbox-stack text-[13px]">
           <DocCheckbox id="tt-amb" label="turpināt ārstēšanu ambulatori, stacionēšana nav nepieciešama" checked={data.talakaTaktika.ambulatori} onChange={(c) => update("talakaTaktika", { ...data.talakaTaktika, ambulatori: c })} />
           <DocCheckbox id="tt-psih" label="psihiatra motivēts lēmums par psihiskās veselības izmeklēšanas, ārstēšanas un rehabilitācijas nepieciešamību psihiatriskajā ārstniecības iestādē" checked={data.talakaTaktika.psihiatraMotivets} onChange={(c) => update("talakaTaktika", { ...data.talakaTaktika, psihiatraMotivets: c })} />
           <DocCheckbox id="tt-stac" label="stacionēts(-a) saskaņā ar Ārstniecības likuma 68.panta pirmās daļas:" checked={data.talakaTaktika.stacionets} onChange={(c) => update("talakaTaktika", { ...data.talakaTaktika, stacionets: c })} />

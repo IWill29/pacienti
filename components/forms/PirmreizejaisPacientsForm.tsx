@@ -315,7 +315,7 @@ export function PirmreizejaisPacientsForm() {
 
             onChange={(value) => update("parKoStradaTeksts", value)}
 
-            className="ml-[140px] mt-1"
+            className="doc-indented-input"
 
           />
 
@@ -385,7 +385,7 @@ export function PirmreizejaisPacientsForm() {
 
         {data.alergijas === "ja" && (
 
-          <DocInlineInput id="alergijas-teksts" value={data.alergijasTeksts} onChange={(v) => update("alergijasTeksts", v)} className="ml-[140px] mt-1" />
+          <DocInlineInput id="alergijas-teksts" value={data.alergijasTeksts} onChange={(v) => update("alergijasTeksts", v)} className="doc-indented-input" />
 
         )}
 
