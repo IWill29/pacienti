@@ -20,6 +20,8 @@ export type PirmreizejaisPiezimes = {
   gimenePsihSasl: string;
   alergijas: string;
   pavLietosana: string;
+  blakusSaslimibas: string;
+  lietotasMedikamenti: string;
 };
 
 export const emptyPirmreizejaisPiezimes = (): PirmreizejaisPiezimes => ({
@@ -39,6 +41,8 @@ export const emptyPirmreizejaisPiezimes = (): PirmreizejaisPiezimes => ({
   gimenePsihSasl: "",
   alergijas: "",
   pavLietosana: "",
+  blakusSaslimibas: "",
+  lietotasMedikamenti: "",
 });
 
 export type PirmreizejaisPacientsData = {
@@ -71,6 +75,8 @@ export type PirmreizejaisPacientsData = {
   };
   alkohols: string;
   suicidsPaskaitijums: string;
+  blakusSaslimibas: JaNe;
+  lietotasMedikamenti: JaNe;
   piezimes: PirmreizejaisPiezimes;
 };
 
@@ -285,6 +291,8 @@ export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
   pavLietosana: { thc: false, kok: false, amf: false, mdma: false },
   alkohols: "",
   suicidsPaskaitijums: "",
+  blakusSaslimibas: "",
+  lietotasMedikamenti: "",
   piezimes: emptyPirmreizejaisPiezimes(),
 });
 

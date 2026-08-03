@@ -67,6 +67,8 @@ export function serializePirmreizejaisPacients(
     gimenePsihSasl: "",
     alergijas: "",
     pavLietosana: "",
+    blakusSaslimibas: "",
+    lietotasMedikamenti: "",
   };
 
   return joinLines([
@@ -136,6 +138,14 @@ export function serializePirmreizejaisPacients(
     ),
     `ALKOHOLS- BIEŽUMS,AR KO: ${data.alkohols || "—"}`,
     `SUICĪDS/ PAŠKAITĒJUMS ANAMN.: ${data.suicidsPaskaitijums || "—"}`,
+    appendPiezime(
+      `BLAKUS SASLIMŠANAS: ${formatJaNe(data.blakusSaslimibas)}`,
+      piezimes.blakusSaslimibas,
+    ),
+    appendPiezime(
+      `LIETOTIE MEDIKAMENTI: ${formatJaNe(data.lietotasMedikamenti)}`,
+      piezimes.lietotasMedikamenti,
+    ),
   ]);
 }
 
@@ -199,7 +209,16 @@ export function serializeProtokols(data: ProtokolsData): string {
     `5. Runa: ${data.runa.temp || "—"}, ${data.runa.saprotamiba || "—"}${data.runa.artikulacija ? ", artikulācijas traucējumi" : ""}`,
     `6. Uztveres traucējumi: ${formatJaNe(data.uztveresTraucejumi)}`,
     `7. Halucinācijas: ${Object.entries(data.halucinacijas).filter(([, v]) => v).map(([k]) => k).join(", ") || "—"}`,
-    `8. Pārvērtēšanas un murgu idejas: ${formatJaNe(data.parvertesanasIdejas.ir)} ${data.parvertesanasIdejas.citas || ""}`,
+    `8. Pārvērtēšanas un murgu idejas: ${formatJaNe(data.parvertesanasIdejas.ir)}${[
+      formatChecked(data.parvertesanasIdejas.paranojalas, "paranojālas"),
+      formatChecked(data.parvertesanasIdejas.paranoīdas, "paranoīdas"),
+      formatChecked(data.parvertesanasIdejas.parafrēnas, "parafrēnas"),
+      formatChecked(data.parvertesanasIdejas.telainas, "tēlainas"),
+      formatChecked(data.parvertesanasIdejas.sistematizetas, "sistematizētas"),
+      data.parvertesanasIdejas.citas ? `citas: ${data.parvertesanasIdejas.citas}` : null,
+    ]
+      .filter(Boolean)
+      .join("; ")}`,
     `9. Ideju ietekme uzvedību: ${data.idejuIetekmeUzvediba || "—"}`,
     `10. Formālās domāšanas traucējumi: ${formatJaNe(data.formalasDomasanas.ir)} ${data.formalasDomasanas.apraksts || ""}`,
     `11. Emocionālās reakcijas: ${data.emocionalasReakcijas.join(", ") || "—"}`,
@@ -224,6 +243,12 @@ export function serializeProtokols(data: ProtokolsData): string {
     "VI Neiroloģiskais stāvoklis:",
     data.neirologiskais.simptomatika || "—",
     data.neirologiskais.citaSimptomatika || "—",
+    [
+      formatChecked(data.neirologiskais.nenovēro, "nenovēro"),
+      formatChecked(data.neirologiskais.ir, "ir"),
+    ]
+      .filter(Boolean)
+      .join("; ") || null,
     "",
     "VII Somatiskais stāvoklis:",
     data.somatisks.nav
@@ -261,6 +286,12 @@ export function serializeProtokols(data: ProtokolsData): string {
       ),
       formatChecked(data.talakaTaktika.stacionets, "stacionēts saskaņā ar Ārstniecības likumu"),
       formatChecked(data.talakaTaktika.piemerotaIerobezosana, "piemērota ierobežošana"),
+      formatChecked(data.talakaTaktika.stacionešanaiPiekrīt, "stacionēšanai piekrīt"),
+      formatChecked(data.talakaTaktika.stacionešanaiNepiekrīt, "stacionēšanai nepiekrīt"),
+      formatChecked(data.talakaTaktika.mrpl, "MRPL"),
+      formatChecked(data.talakaTaktika.stpe, "STPE"),
+      formatChecked(data.talakaTaktika.punkts1, "1.punktu"),
+      formatChecked(data.talakaTaktika.punkts2, "2.punktu"),
     ]
       .filter(Boolean)
       .join("; "),
@@ -273,9 +304,44 @@ export function serializeProtokols(data: ProtokolsData): string {
       formatChecked(data.nozimejumi.ekg, "EKG"),
       formatChecked(data.nozimejumi.pilnaAsinsAina, "pilna asins aina"),
       formatChecked(data.nozimejumi.asat, "ASAT"),
+      formatChecked(data.nozimejumi.rtg, "RTG"),
+      formatChecked(data.nozimejumi.urins, "urīns ar stripu"),
+      formatChecked(data.nozimejumi.alat, "ALAT"),
+      formatChecked(data.nozimejumi.glikoze, "glikoze ar stripu"),
+      formatChecked(data.nozimejumi.ggt, "GGT"),
+      formatChecked(data.nozimejumi.usg, "USG"),
+      formatChecked(data.nozimejumi.na, "Na"),
+      formatChecked(data.nozimejumi.k, "K"),
+      formatChecked(data.nozimejumi.bi, "Bi"),
+      formatChecked(data.nozimejumi.cro, "CRO"),
+      formatChecked(data.nozimejumi.kreatinins, "kreatinīns"),
     ]
       .filter(Boolean)
       .join("; "),
+    data.nozimejumi.novērošanasLimenis === "pasaprūpes"
+      ? "Novērošanas līmenis: pašaprūpes nodrošinājuma palāta"
+      : data.nozimejumi.novērošanasLimenis === "vispareja"
+        ? "Novērošanas līmenis: vispārēja tipa palāta"
+        : null,
+    data.nozimejumi.novērotUz.length > 0
+      ? `Novērot uz: ${data.nozimejumi.novērotUz.join(", ")}`
+      : null,
+    data.nozimejumi.kontrolet.length > 0 || data.nozimejumi.kontroletCits
+      ? `Kontrolēt: ${[
+          ...data.nozimejumi.kontrolet,
+          data.nozimejumi.kontroletCits ? `cits: ${data.nozimejumi.kontroletCits}` : null,
+        ]
+          .filter(Boolean)
+          .join(", ")}`
+      : null,
+    data.nozimejumi.dieta.length > 0 || data.nozimejumi.dietaCita
+      ? `Diēta: ${[
+          ...data.nozimejumi.dieta,
+          data.nozimejumi.dietaCita ? `cita: ${data.nozimejumi.dietaCita}` : null,
+        ]
+          .filter(Boolean)
+          .join(", ")}`
+      : null,
     `Terapija: ${data.nozimejumi.terapija || "—"}`,
     `Citi nozīmējumi: ${data.nozimejumi.citiNozimejumi || "—"}`,
   ]);

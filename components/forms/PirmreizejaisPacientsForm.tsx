@@ -403,6 +403,34 @@ export function PirmreizejaisPacientsForm() {
 
         </DocFieldBlock>
 
+
+
+        <div className="doc-field-block">
+
+          <DocLine label="BLAKUS SASLIMŠANAS" {...noteProps("blakusSaslimibas")}>
+
+            <DocRadio id="bs-ja" name="blakusSaslimibas" label="JĀ" value="ja" checked={data.blakusSaslimibas === "ja"} onChange={(v) => update("blakusSaslimibas", v as "ja" | "ne")} />
+
+            <DocRadio id="bs-ne" name="blakusSaslimibas" label="NĒ" value="ne" checked={data.blakusSaslimibas === "ne"} onChange={(v) => update("blakusSaslimibas", v as "ja" | "ne")} />
+
+          </DocLine>
+
+
+
+          <DocLine
+            label="LIETOTIE MEDIKAMENTI"
+            {...noteProps("lietotasMedikamenti")}
+            notePlaceholder="kādi medikamenti"
+          >
+
+            <DocRadio id="lm-ja" name="lietotasMedikamenti" label="JĀ" value="ja" checked={data.lietotasMedikamenti === "ja"} onChange={(v) => update("lietotasMedikamenti", v as "ja" | "ne")} />
+
+            <DocRadio id="lm-ne" name="lietotasMedikamenti" label="NĒ" value="ne" checked={data.lietotasMedikamenti === "ne"} onChange={(v) => update("lietotasMedikamenti", v as "ja" | "ne")} />
+
+          </DocLine>
+
+        </div>
+
       </article>
 
     </FormShell>
