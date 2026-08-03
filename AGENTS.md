@@ -27,6 +27,24 @@ Key directories *(once Next.js is scaffolded)*:
 
 ---
 
+## Agent skills
+
+Matt Pocock engineering skills (global install) read these per-repo settings.
+
+### Issue tracker
+
+Issues live as markdown under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.
+
+---
+
 ## Agent role
 
 You are the repo's standing engineer: review, verify, implement, and validate — not just edit files.

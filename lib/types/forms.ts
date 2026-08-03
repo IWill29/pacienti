@@ -56,7 +56,6 @@ export type PirmreizejaisPacientsData = {
   biezasDarbaMainas: JaNe;
   sobridStrada: JaNe;
   parKoStrada: JaNe;
-  parKoStradaTeksts: string;
   attiecibuStatuss: string;
   bern: IrNav;
   gimenePsihSasl: IrNav;
@@ -276,7 +275,6 @@ export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
   biezasDarbaMainas: "",
   sobridStrada: "",
   parKoStrada: "",
-  parKoStradaTeksts: "",
   attiecibuStatuss: "",
   bern: "",
   gimenePsihSasl: "",

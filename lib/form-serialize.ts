@@ -115,7 +115,7 @@ export function serializePirmreizejaisPacients(
       piezimes.sobridStrada,
     ),
     appendPiezime(
-      `PAR KO STRĀDĀ: ${formatJaNe(data.parKoStrada)}${data.parKoStradaTeksts ? ` (${data.parKoStradaTeksts})` : ""}`,
+      `PAR KO STRĀDĀ: ${formatJaNe(data.parKoStrada)}`,
       piezimes.parKoStrada,
     ),
     `ATTIECĪBU STATUSS: ${data.attiecibuStatuss || "—"}`,

@@ -305,22 +305,6 @@ export function PirmreizejaisPacientsForm() {
 
         </DocLine>
 
-        {data.parKoStrada === "ja" && (
-
-          <DocInlineInput
-
-            id="par-ko-strada-teksts"
-
-            value={data.parKoStradaTeksts}
-
-            onChange={(value) => update("parKoStradaTeksts", value)}
-
-            className="doc-indented-input"
-
-          />
-
-        )}
-
 
 
         <DocFieldBlock label="ATTIECĪBU STATUSS">
