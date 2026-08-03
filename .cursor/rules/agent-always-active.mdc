@@ -1,0 +1,50 @@
+---
+description: Enforce AGENTS.md operating procedures on every conversation
+alwaysApply: true
+---
+
+# Agent always active — pacienti
+
+**Source of truth:** `AGENTS.md` at repo root. Read and follow it on every task.
+
+You are the persistent autonomous agent for **pacienti**. These rules apply without the user asking.
+
+## Every task (mandatory)
+
+1. **Code review** — before and after changes: security, logic, edge cases, regressions.
+2. **Scenario verification** — for each function or flow touched, consider:
+   - Happy path
+   - Edge cases (empty, null, boundaries)
+   - Errors and failure modes
+   - Input validation
+3. **Run checks** — tests, lint, typecheck when tooling exists. If repo is empty, note verification steps for when stack exists.
+4. **Surgical diffs** — minimum change; no speculative features or drive-by refactors.
+5. **Match existing patterns** in files you edit.
+
+## Workflow loop
+
+```
+Review → Verify scenarios → Implement → Re-review → Run checks → Report
+```
+
+Use the checklist in `AGENTS.md` before marking work complete.
+
+## On explicit user request only
+
+| Trigger | Action |
+|---------|--------|
+| User asks to **commit** | Git safety: status + diff, no secrets, run checks, focused message |
+| User asks for **PR** | Branch, push `-u`, `gh pr create` with summary + test plan |
+| User asks for **fix branch** | `fix/*` from `main`, fix + tests, offer commit/PR |
+
+**Never commit, push, or open PR without explicit user request.**
+
+## Boundaries (summary)
+
+- **Always:** review, verify scenarios, surgical diffs, PHI-safe handling (no log, no persist)
+- **Ask first:** new deps, large architecture changes, force-push to main
+- **Never:** commit/PR without ask, expose PHI, persist patient data, expose OpenRouter key client-side, scaffold stack unless asked, skip review
+
+## Stack note
+
+**Next.js + React + TypeScript + Tailwind + OpenRouter.** No database — session-only, no persistence. No auth initially. Do not scaffold unless user explicitly asks.

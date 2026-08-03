@@ -1,0 +1,15 @@
+import { DynamicProtokolsForm } from "@/components/forms/DynamicProtokolsForm";
+import { FormNavigation } from "@/components/FormNavigation";
+
+export default function ProtokolsPage() {
+  return (
+    <div className="min-h-full bg-gradient-to-b from-zinc-50 to-white">
+      <main className="mx-auto flex min-h-full max-w-5xl flex-col px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div className="mb-6">
+          <FormNavigation />
+        </div>
+        <DynamicProtokolsForm />
+      </main>
+    </div>
+  );
+}
