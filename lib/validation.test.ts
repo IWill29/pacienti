@@ -38,7 +38,7 @@ describe("validateSummaryRequest", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.formType).toBe("pirmreizejais");
-      expect(result.serialized).toContain("DABĪGAS");
+      expect(result.serialized).toContain("dabīgās dzemdībās");
     }
   });
 });

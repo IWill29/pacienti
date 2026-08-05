@@ -10,12 +10,13 @@ import {
 } from "@/lib/types/forms";
 
 describe("serializePirmreizejaisPacients", () => {
-  it("includes filled anamnesis fields and piezimes", () => {
+  it("includes patient identity and filled anamnesis with piezīmes", () => {
     const data = {
       ...emptyPirmreizejaisPacients(),
+      pacientaVardsUzvards: "Testa Pacients",
+      personasKods: "010101-12345",
+      vizitesDatums: "05.08.2026",
       dzemdibasVeids: "dabigas" as const,
-      sarezgijumiDzemdibas: "ne" as const,
-      galvasTraumas: "pirms 13 gadiem pēc kritiena",
       piezimes: {
         ...emptyPirmreizejaisPacients().piezimes,
         dzemdibasVeids: "bez komplikācijām",
@@ -24,15 +25,16 @@ describe("serializePirmreizejaisPacients", () => {
 
     const serialized = serializePirmreizejaisPacients(data);
 
-    expect(serialized).toContain("DABĪGAS");
-    expect(serialized).toContain("pirms 13 gadiem");
+    expect(serialized).toContain("Testa Pacients");
+    expect(serialized).toContain("010101-12345");
+    expect(serialized).toContain("dabīgās dzemdībās");
     expect(serialized).toContain("bez komplikācijām");
   });
 
-  it("includes lietotie medikamenti with piezime for AI prompt", () => {
+  it("includes lietotie medikamenti with piezīme", () => {
     const data = {
       ...emptyPirmreizejaisPacients(),
-      lietotasMedikamenti: "ja" as const,
+      lietotasMedikamenti: "ir" as const,
       piezimes: {
         ...emptyPirmreizejaisPacients().piezimes,
         lietotasMedikamenti: "Tab. Sertraline 50mg",
@@ -41,8 +43,33 @@ describe("serializePirmreizejaisPacients", () => {
 
     const serialized = serializePirmreizejaisPacients(data);
 
-    expect(serialized).toContain("LIETOTIE MEDIKAMENTI: JĀ");
+    expect(serialized).toContain("LIETOTIE MEDIKAMENTI: IR");
     expect(serialized).toContain("Tab. Sertraline 50mg");
+  });
+
+  it("serializes psihiskais stāvoklis and taktika sections", () => {
+    const data = {
+      ...emptyPirmreizejaisPacients(),
+      apzina: "skaidra" as const,
+      garastavoklis: "pazeminats" as const,
+      phq9: "12",
+      gad7: "8",
+      taktikaUzraudziba: "psihiatrs" as const,
+      taktikaIkdiena: true,
+      piezimes: {
+        ...emptyPirmreizejaisPacients().piezimes,
+        taktikaMedikamenti: "Escitalopram 10mg",
+      },
+    };
+
+    const serialized = serializePirmreizejaisPacients(data);
+
+    expect(serialized).toContain("PSIHISKAIS STĀVOKLIS");
+    expect(serialized).toContain("skaidra");
+    expect(serialized).toContain("PHQ9: 12");
+    expect(serialized).toContain("GAD7: 8");
+    expect(serialized).toContain("TAKTIKA");
+    expect(serialized).toContain("Escitalopram 10mg");
   });
 });
 
@@ -76,48 +103,5 @@ describe("serializeProtokols", () => {
     const serialized = serializeProtokols(data);
 
     expect(serialized).toContain("nenovēro");
-  });
-
-  it("includes extended talaka taktika options when checked", () => {
-    const data = {
-      ...emptyProtokols(),
-      talakaTaktika: {
-        ...emptyProtokols().talakaTaktika,
-        mrpl: true,
-        stacionešanaiPiekrīt: true,
-      },
-    };
-
-    const serialized = serializeProtokols(data);
-
-    expect(serialized).toContain("MRPL");
-    expect(serialized).toContain("stacionēšanai piekrīt");
-  });
-
-  it("includes extended nozimejumi when filled", () => {
-    const data = {
-      ...emptyProtokols(),
-      nozimejumi: {
-        ...emptyProtokols().nozimejumi,
-        rtg: true,
-        novērošanasLimenis: "pasaprūpes" as const,
-        novērotUz: ["nemierīgu", "agresīvu"],
-        kontrolet: ["TA"],
-        kontroletCits: "pēc 7 dienām",
-        dieta: ["15."],
-        terapija: "Tab. Sertraline 50mg",
-      },
-    };
-
-    const serialized = serializeProtokols(data);
-
-    expect(serialized).toContain("RTG");
-    expect(serialized).toContain("pašaprūpes nodrošinājuma palāta");
-    expect(serialized).toContain("nemierīgu");
-    expect(serialized).toContain("agresīvu");
-    expect(serialized).toContain("TA");
-    expect(serialized).toContain("pēc 7 dienām");
-    expect(serialized).toContain("15.");
-    expect(serialized).toContain("Tab. Sertraline 50mg");
   });
 });

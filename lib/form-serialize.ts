@@ -28,123 +28,354 @@ function appendPiezime(line: string, piezime: string | undefined): string {
   return trimmed ? `${line} (piez.: ${trimmed})` : line;
 }
 
+function labelOrDash(
+  value: string,
+  labels: Record<string, string>,
+): string {
+  if (!value) return "—";
+  return labels[value] ?? value;
+}
+
 export function serializePirmreizejaisPacients(
   data: PirmreizejaisPacientsData,
 ): string {
-  const dzemdibasLabels: Record<string, string> = {
-    dabigas: "DABĪGAS",
-    "keizargrieziens-akuts": "ĶEIZARGRIEZIENS-AKŪTS",
-    "keizargrieziens-planveida": "ĶEIZARGRIEZIENS-PLĀNVEIDA",
-  };
+  const piez = data.piezimes;
 
-  const sekmesLabels: Record<string, string> = {
-    sliktas: "SLIKTAS",
-    videjas: "VIDĒJAS",
-    labas: "LABAS",
-  };
-
-  const pav = [
+  const pavActive = [
     data.pavLietosana.thc ? "THC" : null,
-    data.pavLietosana.kok ? "KOK" : null,
-    data.pavLietosana.amf ? "AMF" : null,
+    data.pavLietosana.amp ? "AMP" : null,
+    data.pavLietosana.coc ? "COC" : null,
     data.pavLietosana.mdma ? "MDMA" : null,
   ].filter(Boolean);
 
-  const piezimes = data.piezimes ?? {
-    dzemdibasVeids: "",
-    sarezgijumiDzemdibas: "",
-    agrinasAttistibasAiztures: "",
-    bernudarzs: "",
-    draugiBD: "",
-    skola: "",
-    sekmes: "",
-    apcelsanaSkola: "",
-    uzvedibaSkola: "",
-    biezasDarbaMainas: "",
-    sobridStrada: "",
-    parKoStrada: "",
-    bern: "",
-    gimenePsihSasl: "",
-    alergijas: "",
-    pavLietosana: "",
-    blakusSaslimibas: "",
-    lietotasMedikamenti: "",
-  };
+  const pavMegina = [
+    data.pavMegina.thc ? "THC" : null,
+    data.pavMegina.amp ? "AMP" : null,
+    data.pavMegina.coc ? "COC" : null,
+    data.pavMegina.mdma ? "MDMA" : null,
+  ].filter(Boolean);
+
+  const pavLine = data.pavLietosana.nelieto
+    ? "nelieto"
+    : pavActive.length > 0
+      ? `lieto: ${pavActive.join(", ")}`
+      : "—";
 
   return joinLines([
-    "PIRMREIZĒJS PACIENTS",
+    "PIRMREIZĒJĀ KONSULTĀCIJA",
+    `VĀRDS UZVĀRDS: ${data.pacientaVardsUzvards || "—"}`,
+    `PERSONAS KODS: ${data.personasKods || "—"}`,
+    `KONSULTĀCIJAS DATUMS: ${data.vizitesDatums || "—"}`,
     appendPiezime(
-      `DZEMDĪBAS-: ${dzemdibasLabels[data.dzemdibasVeids] ?? "—"}`,
-      piezimes.dzemdibasVeids,
+      `VIZĪTES IEMESLS: ${labelOrDash(data.vizitesIemesls, {
+        pirmo_reizi: "pirmo reizi dzīvē",
+        atkartoti: "atkārtoti",
+      })}`,
+      piez.vizitesIemesls,
+    ),
+    "",
+    "ANAMNĒZE",
+    appendPiezime(
+      `DZIMIS ĢIMENĒ: ${labelOrDash(data.gimeneDzimis, {
+        pilna: "pilnā",
+        skirta: "šķirtā",
+      })}`,
+      piez.gimeneDzimis,
     ),
     appendPiezime(
-      `SAREŽĢĪJUMI DZEMDĪBĀS: ${formatJaNe(data.sarezgijumiDzemdibas)}`,
-      piezimes.sarezgijumiDzemdibas,
+      `DZEMDĪBAS: ${labelOrDash(data.dzemdibasVeids, {
+        dabigas: "dabīgās dzemdībās",
+        keizargrieziens: "ar ķeizargriezienu",
+      })}`,
+      piez.dzemdibasVeids,
     ),
     appendPiezime(
-      `AGRĪNAS ATTĪSTĪBAS AIZTURES: ${formatJaNe(data.agrinasAttistibasAiztures)}`,
-      piezimes.agrinasAttistibasAiztures,
+      `DZEMDĪBU TERMINS: ${labelOrDash(data.dzemdibasTermins, {
+        laicigi: "laicīgi",
+        prieksalicigi: "priekšlaicīgi",
+        noveloti: "novēloti",
+      })}`,
+      piez.dzemdibasTermins,
+    ),
+    appendPiezime(
+      `DZEMDĪBU PATOLOĢIJA: ${labelOrDash(data.dzemdibuPatologija, {
+        neatzime: "neatzīmē",
+        ir: "ir",
+      })}`,
+      piez.dzemdibuPatologija,
+    ),
+    appendPiezime(
+      `AGRĪNĀ ATTĪSTĪBA: ${labelOrDash(data.agrinaAttistiba, {
+        bez_novirzem: "bez novirzēm",
+        ar_novirzem: "ar novirzēm",
+      })}`,
+      piez.agrinaAttistiba,
+    ),
+    appendPiezime(
+      `AUGA: ${labelOrDash(data.augaGimene, {
+        pilna: "pilnā ģimenē",
+        skirta: "šķirtā ģimenē",
+      })}`,
+      piez.augaGimene,
     ),
     appendPiezime(
       `BĒRNUDĀRZS: ${formatJaNe(data.bernudarzs)}`,
-      piezimes.bernudarzs,
+      piez.bernudarzs,
     ),
     appendPiezime(
-      `DRAUGI B/D: ${formatJaNe(data.draugiBD)}`,
-      piezimes.draugiBD,
-    ),
-    appendPiezime(`SKOLĀ: ${data.skola || "—"}`, piezimes.skola),
-    appendPiezime(
-      `SEKMES: ${sekmesLabels[data.sekmes] ?? "—"}`,
-      piezimes.sekmes,
+      `RAKSTURS: ${labelOrDash(data.raksturs, {
+        atverts: "atvērts, komunikabls",
+        nosverts: "nosvērts, kluss",
+      })}`,
+      piez.raksturs,
     ),
     appendPiezime(
-      `APCELŠANA SKOLĀ: ${formatJaNe(data.apcelsanaSkola)}`,
-      piezimes.apcelsanaSkola,
+      `SKOLĀ UZSĀKA: ${data.skola ? `${data.skola} gadu vecumā` : "—"}`,
+      piez.skola,
     ),
     appendPiezime(
-      `UZVEDĪBA SKOLĀ: ${data.uzvedibaSkola === "n" ? "N" : data.uzvedibaSkola === "traucejumi" ? "TRAUCĒJUMI" : "—"}`,
-      piezimes.uzvedibaSkola,
-    ),
-    `IEGŪTĀ IZGLĪTĪBA-: ${data.iegutaIzglitiba || "—"}`,
-    data.augstskola ? "AUGSTSKOLA: JĀ" : "AUGSTSKOLA: NĒ",
-    appendPiezime(
-      `BIEŽAS DARBA MAIŅAS: ${formatJaNe(data.biezasDarbaMainas)}`,
-      piezimes.biezasDarbaMainas,
+      `MĀCĪJĀS: ${labelOrDash(data.sekmes, {
+        slikti: "slikti",
+        videji: "vidēji",
+        labi: "labi",
+      })}`,
+      piez.sekmes,
     ),
     appendPiezime(
-      `ŠOBRĪD STRĀDĀ: ${formatJaNe(data.sobridStrada)}`,
-      piezimes.sobridStrada,
+      `APCELŠANA SKOLĀ: ${labelOrDash(data.apcelsanaSkola, {
+        netika: "netika novērota",
+        tika: "tika novērota",
+      })}`,
+      piez.apcelsanaSkola,
     ),
     appendPiezime(
-      `PAR KO STRĀDĀ: ${formatJaNe(data.parKoStrada)}`,
-      piezimes.parKoStrada,
-    ),
-    `ATTIECĪBU STATUSS: ${data.attiecibuStatuss || "—"}`,
-    appendPiezime(`BĒRNI: ${formatIrNav(data.bern)}`, piezimes.bern),
-    appendPiezime(
-      `ĢIMENĒ PSIH.SASL.: ${formatIrNav(data.gimenePsihSasl)}`,
-      piezimes.gimenePsihSasl,
-    ),
-    `GALVAS TRAUMAS: ${data.galvasTraumas || "—"}`,
-    `INFEKCIJAS: ${data.infekcijas || "—"}`,
-    appendPiezime(
-      `ALERĢIJAS: ${formatJaNe(data.alergijas)}${data.alergijasTeksts ? ` (${data.alergijasTeksts})` : ""}`,
-      piezimes.alergijas,
+      `UZVEDĪBA SKOLĀ: ${labelOrDash(data.uzvedibaSkola, {
+        apmierinosa: "apmierinoša",
+        traucejumi: "ar traucējumiem",
+      })}`,
+      piez.uzvedibaSkola,
     ),
     appendPiezime(
-      `PAV LIETOŠANA: ${pav.length > 0 ? pav.join(", ") : "—"}`,
-      piezimes.pavLietosana,
-    ),
-    `ALKOHOLS- BIEŽUMS,AR KO: ${data.alkohols || "—"}`,
-    `SUICĪDS/ PAŠKAITĒJUMS ANAMN.: ${data.suicidsPaskaitijums || "—"}`,
-    appendPiezime(
-      `BLAKUS SASLIMŠANAS: ${formatJaNe(data.blakusSaslimibas)}`,
-      piezimes.blakusSaslimibas,
+      `IEGŪTĀ IZGLĪTĪBA: ${data.iegutaIzglitiba || "—"}`,
+      piez.iegutaIzglitiba,
     ),
     appendPiezime(
-      `LIETOTIE MEDIKAMENTI: ${formatJaNe(data.lietotasMedikamenti)}`,
-      piezimes.lietotasMedikamenti,
+      `DARBS: ${labelOrDash(data.darbs, {
+        nestrada: "nestrādā",
+        strada: "strādā",
+      })}`,
+      piez.darbs,
+    ),
+    appendPiezime(
+      `ATTIECĪBU STATUSS: ${labelOrDash(data.attiecibuStatuss, {
+        precejies: "precējies",
+        dzivo_viens: "dzīvo viens",
+      })}`,
+      piez.attiecibuStatuss,
+    ),
+    appendPiezime(`BĒRNI: ${formatIrNav(data.bern)}`, piez.bern),
+    appendPiezime(
+      `ĢIMENĒ PSIHISKAS SASLIMŠANAS: ${formatIrNav(data.gimenePsihSasl)}`,
+      piez.gimenePsihSasl,
+    ),
+    appendPiezime(
+      `GALVAS TRAUMAS: ${formatIrNav(data.galvasTraumas)}`,
+      piez.galvasTraumas,
+    ),
+    appendPiezime(
+      `NEIROINFEKCIJAS: ${formatIrNav(data.neiroinfekcijas)}`,
+      piez.neiroinfekcijas,
+    ),
+    appendPiezime(
+      `ALERĢIJAS: ${formatIrNav(data.alergijas)}`,
+      piez.alergijas,
+    ),
+    appendPiezime(
+      `ALKOHOLS: ${labelOrDash(data.alkohols, {
+        nelieto: "nelieto",
+        lieto: "lieto",
+      })}`,
+      piez.alkohols,
+    ),
+    appendPiezime(`PAV LIETOŠANA: ${pavLine}`, piez.pavLietosana),
+    appendPiezime(
+      `PAV MĒĢINĀJIS DZĪVES LAIKĀ: ${pavMegina.length > 0 ? pavMegina.join(", ") : "—"}`,
+      piez.pavMegina,
+    ),
+    appendPiezime(
+      `SUICIDĀLA UZVEDĪBA: ${labelOrDash(data.suicidalaUzvediba, {
+        nav: "nav bijusi",
+        paskaitējums: "veicis paškaitējumu",
+        pasnavibas_meginajums: "veicis pašnāvības mēģinājumu",
+      })}`,
+      piez.suicidalaUzvediba,
+    ),
+    appendPiezime(
+      `BLAKUS SASLIMŠANAS: ${formatIrNav(data.blakusSaslimibas)}`,
+      piez.blakusSaslimibas,
+    ),
+    appendPiezime(
+      `LIETOTIE MEDIKAMENTI: ${formatIrNav(data.lietotasMedikamenti)}`,
+      piez.lietotasMedikamenti,
+    ),
+    "",
+    "PSIHISKAIS STĀVOKLIS",
+    appendPiezime(
+      `APZIŅA: ${labelOrDash(data.apzina, {
+        skaidra: "skaidra",
+        sasaurinata: "sašaurināta",
+      })}`,
+      piez.apzina,
+    ),
+    appendPiezime(
+      `ORIENTĀCIJA: ${labelOrDash(data.orientacija, {
+        pareizi: "orientēts pareizi visos veidos",
+        komentars: "skat. piezīmi",
+      })}`,
+      piez.orientacija,
+    ),
+    appendPiezime(
+      `KONTAKTS: ${labelOrDash(data.kontakts, { pieejams: "kontaktam pieejams" })}`,
+      piez.kontakts,
+    ),
+    appendPiezime(
+      `SARUNAS INICIATĪVA: ${labelOrDash(data.sarunasIniciativa, {
+        uztur: "uztur",
+        neuztur: "neuztur",
+      })}`,
+      piez.sarunasIniciativa,
+    ),
+    appendPiezime(
+      `IZSKATS: ${labelOrDash(data.izskats, {
+        kopts: "kopts",
+        nevizigs: "nevīžīgs",
+      })}`,
+      piez.izskats,
+    ),
+    appendPiezime(
+      `RUNA: ${labelOrDash(data.runa, { apmierinosa: "apmierinoša tempa" })}`,
+      piez.runa,
+    ),
+    appendPiezime(
+      `ATBILDES: ${labelOrDash(data.atbildes, {
+        pec_butibas: "pēc būtības",
+        daleji: "daļēji pēc būtības",
+        ne_pec_butibas: "ne pēc būtības",
+      })}`,
+      piez.atbildes,
+    ),
+    appendPiezime(
+      `STĀSTĪJUMS: ${labelOrDash(data.stastijums, {
+        secigs: "secīgs, plaši izklāsta anamnēzi",
+      })}`,
+      piez.stastijums,
+    ),
+    appendPiezime(`SŪDZAS: ${piez.sudzibas || "—"}`, undefined),
+    appendPiezime(
+      `UZMANĪBA: ${labelOrDash(data.uzmaniba, {
+        noturiga: "noturīga",
+        nenoturiga: "nenoturīga",
+      })}`,
+      piez.uzmaniba,
+    ),
+    appendPiezime(
+      `DOMĀŠANA: ${labelOrDash(data.domasana, { seciga: "secīga" })}`,
+      piez.domasana,
+    ),
+    appendPiezime(
+      `PSIHOPRODUKTĪVA SIMPTOMĀTIKA: ${labelOrDash(data.psihoproduktivs, {
+        nenovero: "nenovēro",
+        ir: "ir (murgi/halucinācijas)",
+      })}`,
+      piez.psihoproduktivs,
+    ),
+    appendPiezime(
+      `GARASTĀVOKLIS: ${labelOrDash(data.garastavoklis, {
+        piepacelts: "piepacelts",
+        neitrals: "neitrāls",
+        pazeminats: "pazemināts",
+      })}`,
+      piez.garastavoklis,
+    ),
+    appendPiezime(
+      `EMOCIONĀLĀS REAKCIJAS: ${data.emocionalasReakcijas.length > 0 ? data.emocionalasReakcijas.join(", ") : "—"}`,
+      piez.emocionalasReakcijas,
+    ),
+    appendPiezime(
+      `TRAUKSME: ${formatJaNe(data.trauksme.ir)}${data.trauksme.veids ? ` (${data.trauksme.veids})` : ""}`,
+      piez.trauksme,
+    ),
+    appendPiezime(
+      `INTELEKTS: ${labelOrDash(data.intelekts, {
+        pilnvertigs: "pilnvērtīgs",
+        viegli: "viegli pazemināts",
+        videji: "vidēji pazemināts",
+        izteikti: "izteikti pazemināts",
+      })}`,
+      piez.intelekts,
+    ),
+    appendPiezime(
+      `SUICIDĀLAS DOMAS: ${labelOrDash(data.suicidalsDomas, {
+        noliedz: "noliedz",
+        atklaj: "atklāj",
+      })}`,
+      piez.suicidalsDomas,
+    ),
+    appendPiezime(
+      `MIEGS: ${data.miegs.length > 0 ? data.miegs.join(", ") : "—"}`,
+      piez.miegs,
+    ),
+    appendPiezime(
+      `KRITIKA: ${labelOrDash(data.kritika, {
+        ir: "ir",
+        nav: "nav",
+        formala: "formāla",
+      })}`,
+      piez.kritika,
+    ),
+    "",
+    appendPiezime(
+      `SOMATISKI: ${labelOrDash(data.somatiski, {
+        bez_patologijas: "bez akūtas patoloģijas",
+        ir: "ir",
+      })}`,
+      piez.somatiski,
+    ),
+    appendPiezime(
+      `NEIROLOĢISKI: ${labelOrDash(data.neirologiski, {
+        bez_simptomatikas: "Bez akūtas CNS perēkļu simptomātikas",
+        ir: "ir",
+      })}`,
+      piez.neirologiski,
+    ),
+    appendPiezime(
+      `PHQ9: ${data.phq9 || "—"}; GAD7: ${data.gad7 || "—"}`,
+      piez.phq9Gad7,
+    ),
+    appendPiezime(
+      "PĀRRUNĀTS AR PACIENTU: miega higiēna, rekomendācijas, medikamentu režīms/blaknes, psiholoģiskā atbalsta iespējas",
+      piez.parrunats,
+    ),
+    "",
+    "TAKTIKA",
+    appendPiezime(
+      `1. UZRAUDZĪBA: ${labelOrDash(data.taktikaUzraudziba, {
+        gimenes_arsts: "ģimenes ārsta",
+        psihiatrs: "psihiatra",
+        cits: "cits",
+      })}`,
+      piez.taktikaUzraudziba,
+    ),
+    data.taktikaIkdiena
+      ? "2. IKDIEŅA: sabalansēts darba-atpūtas režīms, fiziskas aktivitātes ≥1h/dienā, sabalansēts uzturs"
+      : null,
+    appendPiezime("3. MEDIKAMENTOZĀ TERAPIJA:", piez.taktikaMedikamenti),
+    appendPiezime(
+      `4. PSIHOLOĢISKAIS ATBALSTS: ${labelOrDash(data.taktikaPsiholoģija, {
+        psihologisks_atbalsts: "psiholoģisks atbalsts",
+        psihoterapija: "psihoterapija",
+      })}`,
+      piez.taktikaPsiholoģija,
     ),
   ]);
 }

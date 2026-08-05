@@ -3,82 +3,261 @@ export type FormType = "pirmreizejais" | "protokols";
 export type JaNe = "" | "ja" | "ne";
 export type IrNav = "" | "ir" | "nav";
 
+/** Comment keys for every pirmreizējais section — doctor free text. */
 export type PirmreizejaisPiezimes = {
+  vizitesIemesls: string;
+  gimeneDzimis: string;
   dzemdibasVeids: string;
-  sarezgijumiDzemdibas: string;
-  agrinasAttistibasAiztures: string;
+  dzemdibasTermins: string;
+  dzemdibuPatologija: string;
+  agrinaAttistiba: string;
+  augaGimene: string;
   bernudarzs: string;
-  draugiBD: string;
+  raksturs: string;
   skola: string;
   sekmes: string;
   apcelsanaSkola: string;
   uzvedibaSkola: string;
-  biezasDarbaMainas: string;
-  sobridStrada: string;
-  parKoStrada: string;
+  iegutaIzglitiba: string;
+  darbs: string;
+  attiecibuStatuss: string;
   bern: string;
   gimenePsihSasl: string;
+  galvasTraumas: string;
+  neiroinfekcijas: string;
   alergijas: string;
+  alkohols: string;
   pavLietosana: string;
+  pavMegina: string;
+  suicidalaUzvediba: string;
   blakusSaslimibas: string;
   lietotasMedikamenti: string;
+  apzina: string;
+  orientacija: string;
+  kontakts: string;
+  sarunasIniciativa: string;
+  izskats: string;
+  runa: string;
+  atbildes: string;
+  stastijums: string;
+  sudzibas: string;
+  uzmaniba: string;
+  domasana: string;
+  psihoproduktivs: string;
+  garastavoklis: string;
+  emocionalasReakcijas: string;
+  trauksme: string;
+  intelekts: string;
+  suicidalsDomas: string;
+  miegs: string;
+  kritika: string;
+  somatiski: string;
+  neirologiski: string;
+  phq9Gad7: string;
+  parrunats: string;
+  taktikaUzraudziba: string;
+  taktikaMedikamenti: string;
+  taktikaPsiholoģija: string;
 };
 
 export const emptyPirmreizejaisPiezimes = (): PirmreizejaisPiezimes => ({
+  vizitesIemesls: "",
+  gimeneDzimis: "",
   dzemdibasVeids: "",
-  sarezgijumiDzemdibas: "",
-  agrinasAttistibasAiztures: "",
+  dzemdibasTermins: "",
+  dzemdibuPatologija: "",
+  agrinaAttistiba: "",
+  augaGimene: "",
   bernudarzs: "",
-  draugiBD: "",
+  raksturs: "",
   skola: "",
   sekmes: "",
   apcelsanaSkola: "",
   uzvedibaSkola: "",
-  biezasDarbaMainas: "",
-  sobridStrada: "",
-  parKoStrada: "",
+  iegutaIzglitiba: "",
+  darbs: "",
+  attiecibuStatuss: "",
   bern: "",
   gimenePsihSasl: "",
+  galvasTraumas: "",
+  neiroinfekcijas: "",
   alergijas: "",
+  alkohols: "",
   pavLietosana: "",
+  pavMegina: "",
+  suicidalaUzvediba: "",
   blakusSaslimibas: "",
   lietotasMedikamenti: "",
+  apzina: "",
+  orientacija: "",
+  kontakts: "",
+  sarunasIniciativa: "",
+  izskats: "",
+  runa: "",
+  atbildes: "",
+  stastijums: "",
+  sudzibas: "",
+  uzmaniba: "",
+  domasana: "",
+  psihoproduktivs: "",
+  garastavoklis: "",
+  emocionalasReakcijas: "",
+  trauksme: "",
+  intelekts: "",
+  suicidalsDomas: "",
+  miegs: "",
+  kritika: "",
+  somatiski: "",
+  neirologiski: "",
+  phq9Gad7: "",
+  parrunats: "",
+  taktikaUzraudziba: "",
+  taktikaMedikamenti: "",
+  taktikaPsiholoģija: "",
 });
 
 export type PirmreizejaisPacientsData = {
-  dzemdibasVeids: "" | "dabigas" | "keizargrieziens-akuts" | "keizargrieziens-planveida";
-  sarezgijumiDzemdibas: JaNe;
-  agrinasAttistibasAiztures: JaNe;
+  pacientaVardsUzvards: string;
+  personasKods: string;
+  vizitesDatums: string;
+  vizitesIemesls: "" | "pirmo_reizi" | "atkartoti";
+
+  gimeneDzimis: "" | "pilna" | "skirta";
+  dzemdibasVeids: "" | "dabigas" | "keizargrieziens";
+  dzemdibasTermins: "" | "laicigi" | "prieksalicigi" | "noveloti";
+  dzemdibuPatologija: "" | "neatzime" | "ir";
+  agrinaAttistiba: "" | "bez_novirzem" | "ar_novirzem";
+  augaGimene: "" | "pilna" | "skirta";
   bernudarzs: JaNe;
-  draugiBD: JaNe;
-  skola: "" | "7" | "8" | "9";
-  sekmes: "" | "sliktas" | "videjas" | "labas";
-  apcelsanaSkola: JaNe;
-  uzvedibaSkola: "" | "n" | "traucejumi";
+  raksturs: "" | "atverts" | "nosverts";
+  skola: "" | "6" | "7" | "8";
+  sekmes: "" | "slikti" | "videji" | "labi";
+  apcelsanaSkola: "" | "netika" | "tika";
+  uzvedibaSkola: "" | "apmierinosa" | "traucejumi";
   iegutaIzglitiba: string;
-  augstskola: boolean;
-  biezasDarbaMainas: JaNe;
-  sobridStrada: JaNe;
-  parKoStrada: JaNe;
-  attiecibuStatuss: string;
+  darbs: "" | "nestrada" | "strada";
+  attiecibuStatuss: "" | "precejies" | "dzivo_viens";
   bern: IrNav;
   gimenePsihSasl: IrNav;
-  galvasTraumas: string;
-  infekcijas: string;
-  alergijas: JaNe;
-  alergijasTeksts: string;
+  galvasTraumas: IrNav;
+  neiroinfekcijas: IrNav;
+  alergijas: IrNav;
+  alkohols: "" | "nelieto" | "lieto";
   pavLietosana: {
+    nelieto: boolean;
     thc: boolean;
-    kok: boolean;
-    amf: boolean;
+    amp: boolean;
+    coc: boolean;
     mdma: boolean;
   };
-  alkohols: string;
-  suicidsPaskaitijums: string;
-  blakusSaslimibas: JaNe;
-  lietotasMedikamenti: JaNe;
+  pavMegina: {
+    thc: boolean;
+    amp: boolean;
+    coc: boolean;
+    mdma: boolean;
+  };
+  suicidalaUzvediba: "" | "nav" | "paskaitējums" | "pasnavibas_meginajums";
+  blakusSaslimibas: IrNav;
+  lietotasMedikamenti: IrNav;
+
+  apzina: "" | "skaidra" | "sasaurinata";
+  orientacija: "" | "pareizi" | "komentars";
+  kontakts: "" | "pieejams";
+  sarunasIniciativa: "" | "uztur" | "neuztur";
+  izskats: "" | "kopts" | "nevizigs";
+  runa: "" | "apmierinosa";
+  atbildes: "" | "pec_butibas" | "daleji" | "ne_pec_butibas";
+  stastijums: "" | "secigs";
+  uzmaniba: "" | "noturiga" | "nenoturiga";
+  domasana: "" | "seciga";
+  psihoproduktivs: "" | "nenovero" | "ir";
+  garastavoklis: "" | "piepacelts" | "neitrals" | "pazeminats";
+  emocionalasReakcijas: string[];
+  trauksme: {
+    ir: JaNe;
+    veids: "" | "viegla" | "merena" | "izteikta" | "panika";
+  };
+  intelekts: "" | "pilnvertigs" | "viegli" | "videji" | "izteikti";
+  suicidalsDomas: "" | "noliedz" | "atklaj";
+  miegs: string[];
+  kritika: "" | "ir" | "nav" | "formala";
+
+  somatiski: "" | "bez_patologijas" | "ir";
+  neirologiski: "" | "bez_simptomatikas" | "ir";
+  phq9: string;
+  gad7: string;
+
+  taktikaUzraudziba: "" | "gimenes_arsts" | "psihiatrs" | "cits";
+  taktikaIkdiena: boolean;
+  taktikaPsiholoģija: "" | "psihologisks_atbalsts" | "psihoterapija";
+
   piezimes: PirmreizejaisPiezimes;
 };
+
+export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
+  pacientaVardsUzvards: "",
+  personasKods: "",
+  vizitesDatums: "",
+  vizitesIemesls: "",
+  gimeneDzimis: "",
+  dzemdibasVeids: "",
+  dzemdibasTermins: "",
+  dzemdibuPatologija: "",
+  agrinaAttistiba: "",
+  augaGimene: "",
+  bernudarzs: "",
+  raksturs: "",
+  skola: "",
+  sekmes: "",
+  apcelsanaSkola: "",
+  uzvedibaSkola: "",
+  iegutaIzglitiba: "",
+  darbs: "",
+  attiecibuStatuss: "",
+  bern: "",
+  gimenePsihSasl: "",
+  galvasTraumas: "",
+  neiroinfekcijas: "",
+  alergijas: "",
+  alkohols: "",
+  pavLietosana: {
+    nelieto: false,
+    thc: false,
+    amp: false,
+    coc: false,
+    mdma: false,
+  },
+  pavMegina: { thc: false, amp: false, coc: false, mdma: false },
+  suicidalaUzvediba: "",
+  blakusSaslimibas: "",
+  lietotasMedikamenti: "",
+  apzina: "",
+  orientacija: "",
+  kontakts: "",
+  sarunasIniciativa: "",
+  izskats: "",
+  runa: "",
+  atbildes: "",
+  stastijums: "",
+  uzmaniba: "",
+  domasana: "",
+  psihoproduktivs: "",
+  garastavoklis: "",
+  emocionalasReakcijas: [],
+  trauksme: { ir: "", veids: "" },
+  intelekts: "",
+  suicidalsDomas: "",
+  miegs: [],
+  kritika: "",
+  somatiski: "",
+  neirologiski: "",
+  phq9: "",
+  gad7: "",
+  taktikaUzraudziba: "",
+  taktikaIkdiena: false,
+  taktikaPsiholoģija: "",
+  piezimes: emptyPirmreizejaisPiezimes(),
+});
 
 export type ProtokolsData = {
   gads: string;
@@ -265,36 +444,6 @@ export type ProtokolsData = {
     citiNozimejumi: string;
   };
 };
-
-export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
-  dzemdibasVeids: "",
-  sarezgijumiDzemdibas: "",
-  agrinasAttistibasAiztures: "",
-  bernudarzs: "",
-  draugiBD: "",
-  skola: "",
-  sekmes: "",
-  apcelsanaSkola: "",
-  uzvedibaSkola: "",
-  iegutaIzglitiba: "",
-  augstskola: false,
-  biezasDarbaMainas: "",
-  sobridStrada: "",
-  parKoStrada: "",
-  attiecibuStatuss: "",
-  bern: "",
-  gimenePsihSasl: "",
-  galvasTraumas: "",
-  infekcijas: "",
-  alergijas: "",
-  alergijasTeksts: "",
-  pavLietosana: { thc: false, kok: false, amf: false, mdma: false },
-  alkohols: "",
-  suicidsPaskaitijums: "",
-  blakusSaslimibas: "",
-  lietotasMedikamenti: "",
-  piezimes: emptyPirmreizejaisPiezimes(),
-});
 
 export const emptyProtokols = (): ProtokolsData => ({
   gads: "",
