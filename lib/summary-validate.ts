@@ -14,7 +14,11 @@ function extractPiezimes(serialized: string): string[] {
 }
 
 function hasSection(summary: string, heading: string): boolean {
-  const pattern = new RegExp(`(^|\\n)\\s*${heading}\\s*:`, "i");
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `(^|\\n)\\s*(?:\\*\\*)?\\s*${escaped}\\s*(?:\\*\\*)?\\s*:`,
+    "i",
+  );
   return pattern.test(summary);
 }
 
@@ -75,7 +79,9 @@ function validatePirmreizejais(
     /BLAKUS SASLIMŠANAS:\s*NAV/i.test(serialized) &&
     hasSection(summary, "Citas saslimšanas")
   ) {
-    const citas = summary.match(/(?:^|\n)\s*Citas saslimšanas:\s*([^\n]+)/i)?.[1];
+    const citas = summary.match(
+      /(?:^|\n)\s*(?:\*\*)?\s*Citas saslimšanas\s*(?:\*\*)?\s*:\s*([^\n]+)/i,
+    )?.[1];
     if (
       citas &&
       !/noliedz|nav/i.test(citas) &&
@@ -136,8 +142,8 @@ export function validateSummaryOutput(
 
 export function formatValidationFeedback(violations: string[]): string {
   return [
-    "Iepriekšējais kopsavilkums pārkāpa noteikumus:",
+    "Iepriekšējais JSON pārkāpa noteikumus:",
     ...violations.map((violation) => `- ${violation}`),
-    "Labo kopsavilkumu: izmanto TIKAI formas izvēles un piezīmes; neizdomā faktus; neiekļauj [vietturi].",
+    "Labo JSON: izmanto TIKAI formas izvēles un piezīmes; teikumu masīvos katrs elements beidzas ar punktu; null ja nav datu; neizdomā faktus.",
   ].join("\n");
 }

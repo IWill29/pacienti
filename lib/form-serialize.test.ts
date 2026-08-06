@@ -27,7 +27,7 @@ describe("serializePirmreizejaisPacients", () => {
 
     expect(serialized).toContain("Testa Pacients");
     expect(serialized).toContain("010101-12345");
-    expect(serialized).toContain("dabīgās dzemdībās");
+    expect(serialized).toContain("Dzimis dabīgās dzemdībās");
     expect(serialized).toContain("bez komplikācijām");
   });
 
@@ -65,10 +65,12 @@ describe("serializePirmreizejaisPacients", () => {
     const serialized = serializePirmreizejaisPacients(data);
 
     expect(serialized).toContain("PSIHISKAIS STĀVOKLIS");
-    expect(serialized).toContain("skaidra");
+    expect(serialized).toContain("Pie apziņas");
+    expect(serialized).toContain("Garastāvoklis pazemināts");
     expect(serialized).toContain("PHQ9: 12");
     expect(serialized).toContain("GAD7: 8");
     expect(serialized).toContain("TAKTIKA");
+    expect(serialized).toContain("Atrasties psihiatra uzraudzībā!");
     expect(serialized).toContain("Escitalopram 10mg");
   });
 });

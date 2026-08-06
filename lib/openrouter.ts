@@ -1,5 +1,10 @@
-import { sanitizeSummaryMarkdown } from "@/lib/sanitize-summary";
+import { assembleSummary } from "@/lib/assemble-summary";
 import { getSummaryPrompt } from "@/lib/summary-prompts";
+import {
+  getOpenRouterResponseFormat,
+  parseSummaryJson,
+  validateSummaryJsonStructure,
+} from "@/lib/summary-schema";
 import {
   formatValidationFeedback,
   validateSummaryOutput,
@@ -36,6 +41,7 @@ export class OpenRouterError extends Error {
 async function callOpenRouter(
   apiKey: string,
   messages: ChatMessage[],
+  formType: FormType,
 ): Promise<string> {
   const response = await fetch(OPENROUTER_URL, {
     method: "POST",
@@ -48,8 +54,9 @@ async function callOpenRouter(
     body: JSON.stringify({
       model: MODEL,
       messages,
-      temperature: 0.3,
+      temperature: 0,
       max_tokens: 4096,
+      response_format: getOpenRouterResponseFormat(formType),
     }),
   });
 
@@ -90,30 +97,49 @@ export async function generateSummary(
     },
   ];
 
-  for (let attempt = 0; attempt < MAX_SUMMARY_ATTEMPTS; attempt++) {
-    const content = await callOpenRouter(apiKey, messages);
-    const summary = sanitizeSummaryMarkdown(content);
-    const validation = validateSummaryOutput(
-      formType,
-      serializedForm,
-      summary,
-    );
+  let lastSummary = "";
 
-    if (validation.ok) {
-      return summary;
+  for (let attempt = 0; attempt < MAX_SUMMARY_ATTEMPTS; attempt++) {
+    const content = await callOpenRouter(apiKey, messages, formType);
+    const violations: string[] = [];
+
+    try {
+      const json = parseSummaryJson(formType, content);
+      violations.push(...validateSummaryJsonStructure(formType, json));
+
+      const summary = assembleSummary(formType, json);
+      lastSummary = summary;
+
+      const textValidation = validateSummaryOutput(
+        formType,
+        serializedForm,
+        summary,
+      );
+      if (!textValidation.ok) {
+        violations.push(...textValidation.violations);
+      }
+
+      if (violations.length === 0) {
+        return summary;
+      }
+    } catch (error) {
+      violations.push(
+        error instanceof Error ? error.message : "invalid summary JSON",
+      );
     }
 
     if (attempt === MAX_SUMMARY_ATTEMPTS - 1) {
-      // Prefer a best-effort summary over total failure when the model keeps
-      // missing minor formatting rules after several guided retries.
-      return summary;
+      if (lastSummary) {
+        return lastSummary;
+      }
+      throw new OpenRouterError("Summary validation failed");
     }
 
     messages.push(
-      { role: "assistant", content: summary },
+      { role: "assistant", content },
       {
         role: "user",
-        content: formatValidationFeedback(validation.violations),
+        content: formatValidationFeedback(violations),
       },
     );
   }

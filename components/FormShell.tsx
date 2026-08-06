@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import {
+  copySummaryToClipboard,
+  renderSummaryBold,
+} from "@/lib/summary-display";
 import type { FormType } from "@/lib/types/forms";
 
 type SummaryPanelProps = {
@@ -23,7 +27,7 @@ export function SummaryPanel({
     }
 
     try {
-      await navigator.clipboard.writeText(summary);
+      await copySummaryToClipboard(summary);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -61,7 +65,7 @@ export function SummaryPanel({
             </button>
           </div>
           <div className="whitespace-pre-wrap rounded-xl bg-zinc-50 px-4 py-4 text-[15px] leading-relaxed text-zinc-800">
-            {summary}
+            {renderSummaryBold(summary)}
           </div>
         </div>
       )}

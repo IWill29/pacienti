@@ -77,15 +77,15 @@ export function serializePirmreizejaisPacients(
     "ANAMNĒZE",
     appendPiezime(
       `DZIMIS ĢIMENĒ: ${labelOrDash(data.gimeneDzimis, {
-        pilna: "pilnā",
-        skirta: "šķirtā",
+        pilna: "dzimis pilnā ģimenē",
+        skirta: "dzimis šķirtā ģimenē",
       })}`,
       piez.gimeneDzimis,
     ),
     appendPiezime(
       `DZEMDĪBAS: ${labelOrDash(data.dzemdibasVeids, {
-        dabigas: "dabīgās dzemdībās",
-        keizargrieziens: "ar ķeizargriezienu",
+        dabigas: "Dzimis dabīgās dzemdībās",
+        keizargrieziens: "Dzimis ar ķeizargriezienu",
       })}`,
       piez.dzemdibasVeids,
     ),
@@ -99,59 +99,62 @@ export function serializePirmreizejaisPacients(
     ),
     appendPiezime(
       `DZEMDĪBU PATOLOĢIJA: ${labelOrDash(data.dzemdibuPatologija, {
-        neatzime: "neatzīmē",
-        ir: "ir",
+        neatzime: "bez zināmiem sarežģījumiem",
+        ir: "ir dzemdību patoloģija",
       })}`,
       piez.dzemdibuPatologija,
     ),
     appendPiezime(
       `AGRĪNĀ ATTĪSTĪBA: ${labelOrDash(data.agrinaAttistiba, {
-        bez_novirzem: "bez novirzēm",
-        ar_novirzem: "ar novirzēm",
+        bez_novirzem: "Agrīnā attīstība bez būtiskām novirzēm",
+        ar_novirzem: "Agrīnā attīstība ar novirzēm",
       })}`,
       piez.agrinaAttistiba,
     ),
     appendPiezime(
       `AUGA: ${labelOrDash(data.augaGimene, {
-        pilna: "pilnā ģimenē",
-        skirta: "šķirtā ģimenē",
+        pilna: "Auga pilnā ģimenē",
+        skirta: "Auga šķirtā ģimenē",
       })}`,
       piez.augaGimene,
     ),
     appendPiezime(
-      `BĒRNUDĀRZS: ${formatJaNe(data.bernudarzs)}`,
+      `BĒRNUDĀRZS: ${labelOrDash(data.bernudarzs, {
+        ja: "Bērnudārzu apmeklēja",
+        ne: "Bērnudārzu neapmeklēja",
+      })}`,
       piez.bernudarzs,
     ),
     appendPiezime(
       `RAKSTURS: ${labelOrDash(data.raksturs, {
-        atverts: "atvērts, komunikabls",
-        nosverts: "nosvērts, kluss",
+        atverts: "bijis atvērts, komunikabls",
+        nosverts: "bijis nosvērts, kluss",
       })}`,
       piez.raksturs,
     ),
     appendPiezime(
-      `SKOLĀ UZSĀKA: ${data.skola ? `${data.skola} gadu vecumā` : "—"}`,
+      `SKOLĀ UZSĀKA: ${data.skola ? `Skolā uzsāka iet ${data.skola}gv` : "—"}`,
       piez.skola,
     ),
     appendPiezime(
       `MĀCĪJĀS: ${labelOrDash(data.sekmes, {
-        slikti: "slikti",
-        videji: "vidēji",
-        labi: "labi",
+        slikti: "mācījies slikti",
+        videji: "mācījies vidēji",
+        labi: "mācījies labi",
       })}`,
       piez.sekmes,
     ),
     appendPiezime(
       `APCELŠANA SKOLĀ: ${labelOrDash(data.apcelsanaSkola, {
-        netika: "netika novērota",
-        tika: "tika novērota",
+        netika: "apcelšana netika novērota",
+        tika: "apcelšana skolā tika novērota",
       })}`,
       piez.apcelsanaSkola,
     ),
     appendPiezime(
       `UZVEDĪBA SKOLĀ: ${labelOrDash(data.uzvedibaSkola, {
-        apmierinosa: "apmierinoša",
-        traucejumi: "ar traucējumiem",
+        apmierinosa: "uzvedība skolā apmierinoša",
+        traucejumi: "uzvedība skolā ar traucējumiem",
       })}`,
       piez.uzvedibaSkola,
     ),
@@ -187,17 +190,27 @@ export function serializePirmreizejaisPacients(
       piez.neiroinfekcijas,
     ),
     appendPiezime(
-      `ALERĢIJAS: ${formatIrNav(data.alergijas)}`,
+      `ALERĢIJAS: ${labelOrDash(data.alergijas, {
+        nav: "Noliedz",
+        ir: "IR",
+      })}`,
       piez.alergijas,
     ),
     appendPiezime(
       `ALKOHOLS: ${labelOrDash(data.alkohols, {
-        nelieto: "nelieto",
-        lieto: "lieto",
+        nelieto: "Alkoholu nelieto",
+        lieto: "Alkoholu lieto",
       })}`,
       piez.alkohols,
     ),
-    appendPiezime(`PAV LIETOŠANA: ${pavLine}`, piez.pavLietosana),
+    appendPiezime(
+      `PAV LIETOŠANA: ${
+        data.pavLietosana.nelieto
+          ? "Narkotisko vielu lietošanu noliedz"
+          : pavLine
+      }`,
+      piez.pavLietosana,
+    ),
     appendPiezime(
       `PAV MĒĢINĀJIS DZĪVES LAIKĀ: ${pavMegina.length > 0 ? pavMegina.join(", ") : "—"}`,
       piez.pavMegina,
@@ -222,78 +235,85 @@ export function serializePirmreizejaisPacients(
     "PSIHISKAIS STĀVOKLIS",
     appendPiezime(
       `APZIŅA: ${labelOrDash(data.apzina, {
-        skaidra: "skaidra",
-        sasaurinata: "sašaurināta",
+        skaidra: "Pie apziņas",
+        sasaurinata: "Apziņa sašaurināta",
       })}`,
       piez.apzina,
     ),
     appendPiezime(
       `ORIENTĀCIJA: ${labelOrDash(data.orientacija, {
-        pareizi: "orientēts pareizi visos veidos",
+        pareizi: "Pareizi orientēts visos veidos",
         komentars: "skat. piezīmi",
       })}`,
       piez.orientacija,
     ),
     appendPiezime(
-      `KONTAKTS: ${labelOrDash(data.kontakts, { pieejams: "kontaktam pieejams" })}`,
+      `KONTAKTS: ${labelOrDash(data.kontakts, {
+        pieejams: "Kontaktam pieejams",
+      })}`,
       piez.kontakts,
     ),
     appendPiezime(
       `SARUNAS INICIATĪVA: ${labelOrDash(data.sarunasIniciativa, {
-        uztur: "uztur",
-        neuztur: "neuztur",
+        uztur: "sarunas iniciatīvu uztur",
+        neuztur: "sarunas iniciatīvu neuztur",
       })}`,
       piez.sarunasIniciativa,
     ),
     appendPiezime(
       `IZSKATS: ${labelOrDash(data.izskats, {
-        kopts: "kopts",
-        nevizigs: "nevīžīgs",
+        kopts: "izskats kopts",
+        nevizigs: "izskats nevīžīgs",
       })}`,
       piez.izskats,
     ),
     appendPiezime(
-      `RUNA: ${labelOrDash(data.runa, { apmierinosa: "apmierinoša tempa" })}`,
+      `RUNA: ${labelOrDash(data.runa, {
+        apmierinosa: "runa apmierinoša tempa",
+      })}`,
       piez.runa,
     ),
     appendPiezime(
       `ATBILDES: ${labelOrDash(data.atbildes, {
-        pec_butibas: "pēc būtības",
-        daleji: "daļēji pēc būtības",
-        ne_pec_butibas: "ne pēc būtības",
+        pec_butibas: "atbildes pēc būtības",
+        daleji: "atbildes daļēji pēc būtības",
+        ne_pec_butibas: "atbildes ne pēc būtības",
       })}`,
       piez.atbildes,
     ),
     appendPiezime(
       `STĀSTĪJUMS: ${labelOrDash(data.stastijums, {
-        secigs: "secīgs, plaši izklāsta anamnēzi",
+        secigs: "stāstījums secīgs",
       })}`,
       piez.stastijums,
     ),
     appendPiezime(`SŪDZAS: ${piez.sudzibas || "—"}`, undefined),
     appendPiezime(
       `UZMANĪBA: ${labelOrDash(data.uzmaniba, {
-        noturiga: "noturīga",
-        nenoturiga: "nenoturīga",
+        noturiga: "Uzmanība noturīga",
+        nenoturiga: "Uzmanība nenoturīga",
       })}`,
       piez.uzmaniba,
     ),
     appendPiezime(
-      `DOMĀŠANA: ${labelOrDash(data.domasana, { seciga: "secīga" })}`,
+      `DOMĀŠANA: ${labelOrDash(data.domasana, {
+        seciga: "Domāšana secīga, spriedumi loģiski",
+      })}`,
       piez.domasana,
     ),
     appendPiezime(
       `PSIHOPRODUKTĪVA SIMPTOMĀTIKA: ${labelOrDash(data.psihoproduktivs, {
-        nenovero: "nenovēro",
-        ir: "ir (murgi/halucinācijas)",
+        nenovero:
+          "Akūtu psihoproduktīvu simptomātiku (murgus, halucinācijas) nepauž",
+        ir: "ir psihoproduktīva simptomātika (murgi/halucinācijas)",
       })}`,
       piez.psihoproduktivs,
     ),
     appendPiezime(
       `GARASTĀVOKLIS: ${labelOrDash(data.garastavoklis, {
-        piepacelts: "piepacelts",
-        neitrals: "neitrāls",
-        pazeminats: "pazemināts",
+        piepacelts: "Garastāvoklis piepacelts",
+        neitrals: "Garastāvoklis neitrāls",
+        pazeminats: "Garastāvoklis pazemināts",
       })}`,
       piez.garastavoklis,
     ),
@@ -316,8 +336,8 @@ export function serializePirmreizejaisPacients(
     ),
     appendPiezime(
       `SUICIDĀLAS DOMAS: ${labelOrDash(data.suicidalsDomas, {
-        noliedz: "noliedz",
-        atklaj: "atklāj",
+        noliedz: "Suicidālas domas noliedz",
+        atklaj: "Suicidālas domas atklāj",
       })}`,
       piez.suicidalsDomas,
     ),
@@ -327,9 +347,9 @@ export function serializePirmreizejaisPacients(
     ),
     appendPiezime(
       `KRITIKA: ${labelOrDash(data.kritika, {
-        ir: "ir",
-        nav: "nav",
-        formala: "formāla",
+        ir: "Kritika pietiekama",
+        nav: "Kritika nav",
+        formala: "Kritika formāla",
       })}`,
       piez.kritika,
     ),
@@ -353,27 +373,27 @@ export function serializePirmreizejaisPacients(
       piez.phq9Gad7,
     ),
     appendPiezime(
-      "PĀRRUNĀTS AR PACIENTU: miega higiēna, rekomendācijas, medikamentu režīms/blaknes, psiholoģiskā atbalsta iespējas",
+      "PĀRRUNĀTS AR PACIENTU: Ar pacientu pārrunāta miega higiēna, izskaidrotas rekomendācijas, informēts par medikamentu lietošanas režīmu, nepieciešamību, blakus efektiem. Informēts par psiholoģiskā atbalsta saņemšanas iespējām.",
       piez.parrunats,
     ),
     "",
     "TAKTIKA",
     appendPiezime(
       `1. UZRAUDZĪBA: ${labelOrDash(data.taktikaUzraudziba, {
-        gimenes_arsts: "ģimenes ārsta",
-        psihiatrs: "psihiatra",
+        gimenes_arsts: "Atrasties ģimenes ārsta uzraudzībā!",
+        psihiatrs: "Atrasties psihiatra uzraudzībā!",
         cits: "cits",
       })}`,
       piez.taktikaUzraudziba,
     ),
     data.taktikaIkdiena
-      ? "2. IKDIEŅA: sabalansēts darba-atpūtas režīms, fiziskas aktivitātes ≥1h/dienā, sabalansēts uzturs"
+      ? "2. IKDIEŅA: Ikdienā ievērot sabalansētu darba-atpūtas režīmu, veikt fiziskas aktivitātes vismaz 1h/dienā, uzņemt sabalansētu uzturu!"
       : null,
     appendPiezime("3. MEDIKAMENTOZĀ TERAPIJA:", piez.taktikaMedikamenti),
     appendPiezime(
       `4. PSIHOLOĢISKAIS ATBALSTS: ${labelOrDash(data.taktikaPsiholoģija, {
-        psihologisks_atbalsts: "psiholoģisks atbalsts",
-        psihoterapija: "psihoterapija",
+        psihologisks_atbalsts: "Psiholoģisks atbalsts",
+        psihoterapija: "Psihoterapija",
       })}`,
       piez.taktikaPsiholoģija,
     ),
