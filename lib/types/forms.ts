@@ -3,6 +3,18 @@ export type FormType = "pirmreizejais" | "protokols";
 export type JaNe = "" | "ja" | "ne";
 export type IrNav = "" | "ir" | "nav";
 
+export type TaktikaUzraudziba = {
+  gimenes_arsts: boolean;
+  psihiatrs: boolean;
+  cits: boolean;
+};
+
+export const emptyTaktikaUzraudziba = (): TaktikaUzraudziba => ({
+  gimenes_arsts: false,
+  psihiatrs: false,
+  cits: false,
+});
+
 /** Comment keys for every pirmreizējais section — doctor free text. */
 export type PirmreizejaisPiezimes = {
   vizitesIemesls: string;
@@ -187,7 +199,7 @@ export type PirmreizejaisPacientsData = {
   phq9: string;
   gad7: string;
 
-  taktikaUzraudziba: "" | "gimenes_arsts" | "psihiatrs" | "cits";
+  taktikaUzraudziba: TaktikaUzraudziba;
   taktikaIkdiena: boolean;
   taktikaPsiholoģija: "" | "psihologisks_atbalsts" | "psihoterapija";
 
@@ -253,7 +265,7 @@ export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
   neirologiski: "",
   phq9: "",
   gad7: "",
-  taktikaUzraudziba: "",
+  taktikaUzraudziba: emptyTaktikaUzraudziba(),
   taktikaIkdiena: false,
   taktikaPsiholoģija: "",
   piezimes: emptyPirmreizejaisPiezimes(),

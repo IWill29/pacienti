@@ -158,10 +158,9 @@ export function serializePirmreizejaisPacients(
       })}`,
       piez.uzvedibaSkola,
     ),
-    appendPiezime(
-      `IEGŪTĀ IZGLĪTĪBA: ${data.iegutaIzglitiba || "—"}`,
-      piez.iegutaIzglitiba,
-    ),
+    piez.iegutaIzglitiba.trim()
+      ? `IEGŪTĀ IZGLĪTĪBA: ${piez.iegutaIzglitiba.trim()}`
+      : null,
     appendPiezime(
       `DARBS: ${labelOrDash(data.darbs, {
         nestrada: "nestrādā",
@@ -379,11 +378,19 @@ export function serializePirmreizejaisPacients(
     "",
     "TAKTIKA",
     appendPiezime(
-      `1. UZRAUDZĪBA: ${labelOrDash(data.taktikaUzraudziba, {
-        gimenes_arsts: "Atrasties ģimenes ārsta uzraudzībā!",
-        psihiatrs: "Atrasties psihiatra uzraudzībā!",
-        cits: "cits",
-      })}`,
+      `1. UZRAUDZĪBA: ${[
+        formatChecked(
+          data.taktikaUzraudziba.gimenes_arsts,
+          "Atrasties ģimenes ārsta uzraudzībā!",
+        ),
+        formatChecked(
+          data.taktikaUzraudziba.psihiatrs,
+          "Atrasties psihiatra uzraudzībā!",
+        ),
+        formatChecked(data.taktikaUzraudziba.cits, "cits"),
+      ]
+        .filter(Boolean)
+        .join(" ") || "—"}`,
       piez.taktikaUzraudziba,
     ),
     data.taktikaIkdiena

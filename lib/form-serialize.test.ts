@@ -54,7 +54,11 @@ describe("serializePirmreizejaisPacients", () => {
       garastavoklis: "pazeminats" as const,
       phq9: "12",
       gad7: "8",
-      taktikaUzraudziba: "psihiatrs" as const,
+      taktikaUzraudziba: {
+        gimenes_arsts: false,
+        psihiatrs: true,
+        cits: false,
+      },
       taktikaIkdiena: true,
       piezimes: {
         ...emptyPirmreizejaisPacients().piezimes,
@@ -72,6 +76,22 @@ describe("serializePirmreizejaisPacients", () => {
     expect(serialized).toContain("TAKTIKA");
     expect(serialized).toContain("Atrasties psihiatra uzraudzībā!");
     expect(serialized).toContain("Escitalopram 10mg");
+  });
+
+  it("serializes multiple uzraudzība options", () => {
+    const data = {
+      ...emptyPirmreizejaisPacients(),
+      taktikaUzraudziba: {
+        gimenes_arsts: true,
+        psihiatrs: true,
+        cits: false,
+      },
+    };
+
+    const serialized = serializePirmreizejaisPacients(data);
+
+    expect(serialized).toContain("Atrasties ģimenes ārsta uzraudzībā!");
+    expect(serialized).toContain("Atrasties psihiatra uzraudzībā!");
   });
 });
 

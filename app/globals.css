@@ -53,9 +53,11 @@ body {
 
 .doc-line--with-note {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr) minmax(140px, 1fr);
-  grid-template-areas: "label options note";
-  align-items: center;
+  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-areas:
+    "label options"
+    "note note";
+  align-items: start;
   gap: 0.5rem 1rem;
 }
 
@@ -66,6 +68,12 @@ body {
 .doc-line--with-note .doc-line-options {
   grid-area: options;
   flex: unset;
+}
+
+.doc-line--note-only {
+  grid-template-areas:
+    "label label"
+    "note note";
 }
 
 @media (max-width: 639px) {
@@ -84,12 +92,11 @@ body {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  justify-self: stretch;
 }
 
 @media (min-width: 640px) {
   .doc-line-note {
-    min-width: 140px;
+    margin-left: 0;
   }
 }
 

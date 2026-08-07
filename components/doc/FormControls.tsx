@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 type DocCheckboxProps = {
   id: string;
   label: string;
@@ -129,9 +130,49 @@ export function DocTextArea({
   );
 }
 
+type DocLineNoteProps = {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+};
+
+function DocLineNote({
+  id,
+  value,
+  onChange,
+  placeholder = "Piezīme",
+  disabled,
+}: DocLineNoteProps) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) {
+      return;
+    }
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      id={id}
+      value={value}
+      rows={2}
+      disabled={disabled}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
+      className="doc-line-note doc-textarea min-h-[3.25rem] resize-none"
+    />
+  );
+}
+
 type DocLineProps = {
   label: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   noteId?: string;
   noteValue?: string;
   onNoteChange?: (value: string) => void;
@@ -147,20 +188,33 @@ export function DocLine({
   notePlaceholder = "Piezīme",
 }: DocLineProps) {
   const hasNote = noteId != null && onNoteChange != null;
+  const hasOptions =
+    children != null &&
+    !(typeof children === "boolean") &&
+    (Array.isArray(children) ? children.length > 0 : true);
 
   return (
-    <div className={hasNote ? "doc-line doc-line--with-note" : "doc-line"}>
+    <div
+      className={
+        hasNote
+          ? hasOptions
+            ? "doc-line doc-line--with-note"
+            : "doc-line doc-line--with-note doc-line--note-only"
+          : "doc-line"
+      }
+    >
       <span className="doc-label shrink-0">{label}</span>
-      <div className="doc-line-options flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-        {children}
-      </div>
+      {hasOptions ? (
+        <div className="doc-line-options flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+          {children}
+        </div>
+      ) : null}
       {hasNote ? (
-        <DocInlineInput
+        <DocLineNote
           id={noteId}
           value={noteValue}
           onChange={onNoteChange}
           placeholder={notePlaceholder}
-          className="doc-line-note"
         />
       ) : null}
     </div>

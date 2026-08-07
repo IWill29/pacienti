@@ -474,14 +474,7 @@ export function PirmreizejaisPacientsForm() {
           />
         </DocLine>
 
-        <DocLine label="IEGŪTĀ IZGLĪTĪBA" {...noteProps("iegutaIzglitiba")}>
-          <DocInlineInput
-            id="izglitiba"
-            value={data.iegutaIzglitiba}
-            onChange={(v) => update("iegutaIzglitiba", v)}
-            placeholder="apraksts"
-          />
-        </DocLine>
+        <DocLine label="IEGŪTĀ IZGLĪTĪBA" {...noteProps("iegutaIzglitiba")} />
 
         <DocLine label="ŠOBRĪD" {...noteProps("darbs")}>
           <DocRadio
@@ -997,9 +990,7 @@ export function PirmreizejaisPacientsForm() {
           />
         </DocLine>
 
-        <DocLine label="SŪDZAS" {...noteProps("sudzibas")}>
-          <span className="text-[13px] text-zinc-500">komentārs →</span>
-        </DocLine>
+        <DocLine label="SŪDZAS" {...noteProps("sudzibas")} />
 
         <DocLine label="UZMANĪBA" {...noteProps("uzmaniba")}>
           <DocRadio
@@ -1396,43 +1387,37 @@ export function PirmreizejaisPacientsForm() {
         <DocSectionTitle>Taktika</DocSectionTitle>
 
         <DocLine label="1. UZRAUDZĪBĀ" {...noteProps("taktikaUzraudziba")}>
-          <DocRadio
+          <DocCheckbox
             id="tu-ga"
-            name="taktikaUzraudziba"
             label="ģimenes ārsta"
-            value="gimenes_arsts"
-            checked={data.taktikaUzraudziba === "gimenes_arsts"}
-            onChange={(v) =>
-              update(
-                "taktikaUzraudziba",
-                v as PirmreizejaisPacientsData["taktikaUzraudziba"],
-              )
+            checked={data.taktikaUzraudziba.gimenes_arsts}
+            onChange={(checked) =>
+              update("taktikaUzraudziba", {
+                ...data.taktikaUzraudziba,
+                gimenes_arsts: checked,
+              })
             }
           />
-          <DocRadio
+          <DocCheckbox
             id="tu-ps"
-            name="taktikaUzraudziba"
             label="psihiatra"
-            value="psihiatrs"
-            checked={data.taktikaUzraudziba === "psihiatrs"}
-            onChange={(v) =>
-              update(
-                "taktikaUzraudziba",
-                v as PirmreizejaisPacientsData["taktikaUzraudziba"],
-              )
+            checked={data.taktikaUzraudziba.psihiatrs}
+            onChange={(checked) =>
+              update("taktikaUzraudziba", {
+                ...data.taktikaUzraudziba,
+                psihiatrs: checked,
+              })
             }
           />
-          <DocRadio
+          <DocCheckbox
             id="tu-cits"
-            name="taktikaUzraudziba"
             label="cits"
-            value="cits"
-            checked={data.taktikaUzraudziba === "cits"}
-            onChange={(v) =>
-              update(
-                "taktikaUzraudziba",
-                v as PirmreizejaisPacientsData["taktikaUzraudziba"],
-              )
+            checked={data.taktikaUzraudziba.cits}
+            onChange={(checked) =>
+              update("taktikaUzraudziba", {
+                ...data.taktikaUzraudziba,
+                cits: checked,
+              })
             }
           />
         </DocLine>
@@ -1450,9 +1435,7 @@ export function PirmreizejaisPacientsForm() {
           label="3. MEDIKAMENTOZĀ TERAPIJA"
           {...noteProps("taktikaMedikamenti")}
           notePlaceholder="medikamenti"
-        >
-          <span className="text-[13px] text-zinc-500">komentārs →</span>
-        </DocLine>
+        />
 
         <DocLine label="4. PSIHOLOĢISKAIS ATBALSTS" {...noteProps("taktikaPsiholoģija")}>
           <DocRadio
