@@ -32,6 +32,7 @@ describe("assemblePirmreizejaisSummary", () => {
       gad7: "8",
       parrunatsArPacientu:
         "Ar pacientu pārrunāta miega higiēna, izskaidrotas rekomendācijas.",
+      diagnoze: "F41.2 Trauksme ar depresiju",
       taktika: [
         "Atrasties psihiatra uzraudzībā!",
         "Psiholoģisks atbalsts.",
@@ -48,6 +49,7 @@ describe("assemblePirmreizejaisSummary", () => {
     );
     expect(text).toContain("**Galvas traumas**- pirms 10 gadiem");
     expect(text).toContain("**PHQ9**- 12; **GAD7**- 8");
+    expect(text).toContain("**Diagnoze:** F41.2 Trauksme ar depresiju");
     expect(text).toContain("**Taktika:**");
     expect(text).toContain("1. Atrasties psihiatra uzraudzībā!");
     expect(text).toContain("2. Psiholoģisks atbalsts.");

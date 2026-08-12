@@ -60,6 +60,26 @@ describe("validateSummaryOutput", () => {
     }
   });
 
+  it("requires pirmreizejais diagnoze from form when provided", () => {
+    const serialized = "DIAGNOZE: F41.2 Trauksme ar depresiju";
+
+    expect(
+      validateSummaryOutput(
+        "pirmreizejais",
+        serialized,
+        "Anamnēze no pacienta: bezmiegs.",
+      ).ok,
+    ).toBe(false);
+
+    expect(
+      validateSummaryOutput(
+        "pirmreizejais",
+        serialized,
+        "Diagnoze: F41.2 Trauksme ar depresiju",
+      ).ok,
+    ).toBe(true);
+  });
+
   it("requires protokols diagnoze from form", () => {
     const serialized = "XI DIAGNOZE: F41.2 Trauksme ar depresiju";
 

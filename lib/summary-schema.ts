@@ -19,6 +19,7 @@ export type PirmreizejaisSummaryJson = {
   phq9: string | null;
   gad7: string | null;
   parrunatsArPacientu: string | null;
+  diagnoze: string | null;
   taktika: string[] | null;
 };
 
@@ -62,6 +63,7 @@ const PIRMREIZEJAIS_PROPERTIES = {
   phq9: NULLABLE_STRING,
   gad7: NULLABLE_STRING,
   parrunatsArPacientu: NULLABLE_STRING,
+  diagnoze: NULLABLE_STRING,
   taktika: NULLABLE_STRING_ARRAY,
 };
 
@@ -210,6 +212,7 @@ export function parseSummaryJson(
         record.parrunatsArPacientu,
         "parrunatsArPacientu",
       ),
+      diagnoze: asNullableString(record.diagnoze, "diagnoze"),
       taktika: asNullableStringArray(record.taktika, "taktika"),
     };
   }

@@ -27,6 +27,7 @@ describe("parseSummaryJson", () => {
         phq9: null,
         gad7: null,
         parrunatsArPacientu: null,
+        diagnoze: null,
         taktika: null,
       }),
     );
@@ -46,7 +47,7 @@ describe("parseSummaryJson", () => {
   it("strips markdown code fences", () => {
     const json = parseSummaryJson(
       "pirmreizejais",
-      '```json\n{"pacientaVardsUzvards":null,"personasKods":null,"konsultacijasDatums":null,"vizitesIemesls":null,"anamneze":["Dzimis."],"psihoaktivasVielas":null,"citasSaslimbas":null,"lietotieMedikamenti":null,"galvasTraumas":null,"neiroinfekcijas":null,"alergijas":null,"psihiskaisStavoklis":null,"somatiski":null,"neirologiski":null,"phq9":null,"gad7":null,"parrunatsArPacientu":null,"taktika":null}\n```',
+      '```json\n{"pacientaVardsUzvards":null,"personasKods":null,"konsultacijasDatums":null,"vizitesIemesls":null,"anamneze":["Dzimis."],"psihoaktivasVielas":null,"citasSaslimbas":null,"lietotieMedikamenti":null,"galvasTraumas":null,"neiroinfekcijas":null,"alergijas":null,"psihiskaisStavoklis":null,"somatiski":null,"neirologiski":null,"phq9":null,"gad7":null,"parrunatsArPacientu":null,"diagnoze":null,"taktika":null}\n```',
     );
 
     expect(json.anamneze).toEqual(["Dzimis."]);
@@ -75,6 +76,7 @@ describe("validateSummaryJsonStructure", () => {
         phq9: null,
         gad7: null,
         parrunatsArPacientu: null,
+        diagnoze: null,
         taktika: null,
       }),
     );

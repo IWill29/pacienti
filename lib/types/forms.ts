@@ -2,6 +2,7 @@ export type FormType = "pirmreizejais" | "protokols";
 
 export type JaNe = "" | "ja" | "ne";
 export type IrNav = "" | "ir" | "nav";
+export type PacientaDzimums = "" | "virietis" | "sieviete";
 
 export type TaktikaUzraudziba = {
   gimenes_arsts: boolean;
@@ -67,6 +68,7 @@ export type PirmreizejaisPiezimes = {
   neirologiski: string;
   phq9Gad7: string;
   parrunats: string;
+  diagnoze: string;
   taktikaUzraudziba: string;
   taktikaMedikamenti: string;
   taktikaPsiholoģija: string;
@@ -123,6 +125,7 @@ export const emptyPirmreizejaisPiezimes = (): PirmreizejaisPiezimes => ({
   neirologiski: "",
   phq9Gad7: "",
   parrunats: "",
+  diagnoze: "",
   taktikaUzraudziba: "",
   taktikaMedikamenti: "",
   taktikaPsiholoģija: "",
@@ -131,6 +134,7 @@ export const emptyPirmreizejaisPiezimes = (): PirmreizejaisPiezimes => ({
 export type PirmreizejaisPacientsData = {
   pacientaVardsUzvards: string;
   personasKods: string;
+  pacientaDzimums: PacientaDzimums;
   vizitesDatums: string;
   vizitesIemesls: "" | "pirmo_reizi" | "atkartoti";
 
@@ -209,6 +213,7 @@ export type PirmreizejaisPacientsData = {
 export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
   pacientaVardsUzvards: "",
   personasKods: "",
+  pacientaDzimums: "",
   vizitesDatums: "",
   vizitesIemesls: "",
   gimeneDzimis: "",

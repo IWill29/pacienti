@@ -1,6 +1,7 @@
 import type { FormType } from "@/lib/types/forms";
 
 import { PIRMREIZEJAIS_PHRASE_BANK } from "@/lib/summary-prompts-phrases";
+import { GENDER_PROMPT_RULES } from "@/lib/gender-phrases";
 
 export { PIRMREIZEJAIS_PHRASE_BANK } from "@/lib/summary-prompts-phrases";
 
@@ -19,11 +20,12 @@ JSON LAUKI (pirmreizējais):
 - pacientaVardsUzvards, personasKods, konsultacijasDatums: string | null
 - vizitesIemesls, anamneze, psihoaktivasVielas, psihiskaisStavoklis, taktika: string[] | null
 - citasSaslimbas, lietotieMedikamenti, galvasTraumas, neiroinfekcijas, alergijas: string | null
-- somatiski, neirologiski, phq9, gad7, parrunatsArPacientu: string | null
+- somatiski, neirologiski, phq9, gad7, parrunatsArPacientu, diagnoze: string | null
 
 galvasTraumas / neiroinfekcijas: tikai saturs (bez "Galvas traumas-" — to pievieno serveris)
 alergijas: ja formā NAV → "Noliedz" vai null atkarībā no formas
 parrunatsArPacientu: pilns teikums par pārrunāto ar pacientu vai null
+diagnoze: tikai no formas DIAGNOZE lauka; null ja nav norādīts
 taktika: masīvs ar punktiem (bez numuriem — numurus pievieno serveris)`;
 
 const PROTOKOLS_JSON_FIELDS = `
@@ -42,6 +44,7 @@ ${PIRMREIZEJAIS_PHRASE_BANK}
 --- FRĀŽU BEIGAS ---
 
 ${PIRMREIZEJAIS_JSON_FIELDS}
+${GENDER_PROMPT_RULES}
 ${JSON_OUTPUT_RULES}`,
 
   protokols: `Tu esi medicīnas asistents psihiatram. Saņemsi psihiatriskās apskates protokolu.

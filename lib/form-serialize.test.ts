@@ -31,6 +31,24 @@ describe("serializePirmreizejaisPacients", () => {
     expect(serialized).toContain("bez komplikācijām");
   });
 
+  it("serializes feminine grammar when pacienta dzimums is sieviete", () => {
+    const data = {
+      ...emptyPirmreizejaisPacients(),
+      pacientaDzimums: "sieviete" as const,
+      dzemdibasVeids: "dabigas" as const,
+      sekmes: "videji" as const,
+      orientacija: "pareizi" as const,
+    };
+
+    const serialized = serializePirmreizejaisPacients(data);
+
+    expect(serialized).toContain("PACIENTA DZIMUMS: sieviete");
+    expect(serialized).toContain("Dzimusi dabīgās dzemdībās");
+    expect(serialized).toContain("mācījusies vidēji");
+    expect(serialized).toContain("Pareizi orientēta visos veidos");
+    expect(serialized).toContain("informēta par medikamentu");
+  });
+
   it("includes lietotie medikamenti with piezīme", () => {
     const data = {
       ...emptyPirmreizejaisPacients(),

@@ -108,6 +108,7 @@ export function assemblePirmreizejaisSummary(
     labeledSection("Neiroloģiski", data.neirologiski),
     formatPhqGad(data.phq9, data.gad7),
     data.parrunatsArPacientu?.trim() || null,
+    labeledSection("Diagnoze", data.diagnoze),
     formatTaktika(data.taktika),
   ]);
 }

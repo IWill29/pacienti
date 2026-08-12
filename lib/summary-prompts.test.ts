@@ -9,10 +9,12 @@ describe("getSummaryPrompt", () => {
     expect(prompt).toContain("JSON objektu");
     expect(prompt).toContain("pacientaVardsUzvards");
     expect(prompt).toContain("anamneze");
+    expect(prompt).toContain("diagnoze");
     expect(prompt).toContain("NEKAD neizdomā faktus");
     expect(prompt).not.toContain("Aleksandrs Stoikevics");
     expect(prompt).toContain("ŠABLONA FRĀZES");
     expect(prompt).toContain("Dzimis dabīgās dzemdībās");
+    expect(prompt).toContain("DZIMUMS");
   });
 
   it("requests structured JSON output for protokols", () => {

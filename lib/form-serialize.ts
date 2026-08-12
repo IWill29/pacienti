@@ -1,3 +1,8 @@
+import {
+  formatPacientaDzimums,
+  genderLabelOrDash,
+  parrunatsArPacientuDefault,
+} from "@/lib/gender-phrases";
 import type {
   PirmreizejaisPacientsData,
   ProtokolsData,
@@ -40,6 +45,7 @@ export function serializePirmreizejaisPacients(
   data: PirmreizejaisPacientsData,
 ): string {
   const piez = data.piezimes;
+  const dz = data.pacientaDzimums;
 
   const pavActive = [
     data.pavLietosana.thc ? "THC" : null,
@@ -65,6 +71,7 @@ export function serializePirmreizejaisPacients(
     "PIRMREIZĒJĀ KONSULTĀCIJA",
     `VĀRDS UZVĀRDS: ${data.pacientaVardsUzvards || "—"}`,
     `PERSONAS KODS: ${data.personasKods || "—"}`,
+    `PACIENTA DZIMUMS: ${formatPacientaDzimums(dz)}`,
     `KONSULTĀCIJAS DATUMS: ${data.vizitesDatums || "—"}`,
     appendPiezime(
       `VIZĪTES IEMESLS: ${labelOrDash(data.vizitesIemesls, {
@@ -76,17 +83,27 @@ export function serializePirmreizejaisPacients(
     "",
     "ANAMNĒZE",
     appendPiezime(
-      `DZIMIS ĢIMENĒ: ${labelOrDash(data.gimeneDzimis, {
-        pilna: "dzimis pilnā ģimenē",
-        skirta: "dzimis šķirtā ģimenē",
-      })}`,
+      `DZIMIS ĢIMENĒ: ${genderLabelOrDash(
+        data.gimeneDzimis,
+        { pilna: "dzimis pilnā ģimenē", skirta: "dzimis šķirtā ģimenē" },
+        { pilna: "dzimusi pilnā ģimenē", skirta: "dzimusi šķirtā ģimenē" },
+        dz,
+      )}`,
       piez.gimeneDzimis,
     ),
     appendPiezime(
-      `DZEMDĪBAS: ${labelOrDash(data.dzemdibasVeids, {
-        dabigas: "Dzimis dabīgās dzemdībās",
-        keizargrieziens: "Dzimis ar ķeizargriezienu",
-      })}`,
+      `DZEMDĪBAS: ${genderLabelOrDash(
+        data.dzemdibasVeids,
+        {
+          dabigas: "Dzimis dabīgās dzemdībās",
+          keizargrieziens: "Dzimis ar ķeizargriezienu",
+        },
+        {
+          dabigas: "Dzimusi dabīgās dzemdībās",
+          keizargrieziens: "Dzimusi ar ķeizargriezienu",
+        },
+        dz,
+      )}`,
       piez.dzemdibasVeids,
     ),
     appendPiezime(
@@ -126,10 +143,18 @@ export function serializePirmreizejaisPacients(
       piez.bernudarzs,
     ),
     appendPiezime(
-      `RAKSTURS: ${labelOrDash(data.raksturs, {
-        atverts: "bijis atvērts, komunikabls",
-        nosverts: "bijis nosvērts, kluss",
-      })}`,
+      `RAKSTURS: ${genderLabelOrDash(
+        data.raksturs,
+        {
+          atverts: "bijis atvērts, komunikabls",
+          nosverts: "bijis nosvērts, kluss",
+        },
+        {
+          atverts: "bijusi atvērta, komunikabla",
+          nosverts: "bijusi nosvērta, klusa",
+        },
+        dz,
+      )}`,
       piez.raksturs,
     ),
     appendPiezime(
@@ -137,11 +162,20 @@ export function serializePirmreizejaisPacients(
       piez.skola,
     ),
     appendPiezime(
-      `MĀCĪJĀS: ${labelOrDash(data.sekmes, {
-        slikti: "mācījies slikti",
-        videji: "mācījies vidēji",
-        labi: "mācījies labi",
-      })}`,
+      `MĀCĪJĀS: ${genderLabelOrDash(
+        data.sekmes,
+        {
+          slikti: "mācījies slikti",
+          videji: "mācījies vidēji",
+          labi: "mācījies labi",
+        },
+        {
+          slikti: "mācījusies slikti",
+          videji: "mācījusies vidēji",
+          labi: "mācījusies labi",
+        },
+        dz,
+      )}`,
       piez.sekmes,
     ),
     appendPiezime(
@@ -169,10 +203,12 @@ export function serializePirmreizejaisPacients(
       piez.darbs,
     ),
     appendPiezime(
-      `ATTIECĪBU STATUSS: ${labelOrDash(data.attiecibuStatuss, {
-        precejies: "precējies",
-        dzivo_viens: "dzīvo viens",
-      })}`,
+      `ATTIECĪBU STATUSS: ${genderLabelOrDash(
+        data.attiecibuStatuss,
+        { precejies: "precējies", dzivo_viens: "dzīvo viens" },
+        { precejies: "precējusies", dzivo_viens: "dzīvo viena" },
+        dz,
+      )}`,
       piez.attiecibuStatuss,
     ),
     appendPiezime(`BĒRNI: ${formatIrNav(data.bern)}`, piez.bern),
@@ -215,11 +251,20 @@ export function serializePirmreizejaisPacients(
       piez.pavMegina,
     ),
     appendPiezime(
-      `SUICIDĀLA UZVEDĪBA: ${labelOrDash(data.suicidalaUzvediba, {
-        nav: "nav bijusi",
-        paskaitējums: "veicis paškaitējumu",
-        pasnavibas_meginajums: "veicis pašnāvības mēģinājumu",
-      })}`,
+      `SUICIDĀLA UZVEDĪBA: ${genderLabelOrDash(
+        data.suicidalaUzvediba,
+        {
+          nav: "nav bijusi",
+          paskaitējums: "veicis paškaitējumu",
+          pasnavibas_meginajums: "veicis pašnāvības mēģinājumu",
+        },
+        {
+          nav: "nav bijusi",
+          paskaitējums: "veikusi paškaitējumu",
+          pasnavibas_meginajums: "veikusi pašnāvības mēģinājumu",
+        },
+        dz,
+      )}`,
       piez.suicidalaUzvediba,
     ),
     appendPiezime(
@@ -240,10 +285,12 @@ export function serializePirmreizejaisPacients(
       piez.apzina,
     ),
     appendPiezime(
-      `ORIENTĀCIJA: ${labelOrDash(data.orientacija, {
-        pareizi: "Pareizi orientēts visos veidos",
-        komentars: "skat. piezīmi",
-      })}`,
+      `ORIENTĀCIJA: ${genderLabelOrDash(
+        data.orientacija,
+        { pareizi: "Pareizi orientēts visos veidos", komentars: "skat. piezīmi" },
+        { pareizi: "Pareizi orientēta visos veidos", komentars: "skat. piezīmi" },
+        dz,
+      )}`,
       piez.orientacija,
     ),
     appendPiezime(
@@ -371,10 +418,8 @@ export function serializePirmreizejaisPacients(
       `PHQ9: ${data.phq9 || "—"}; GAD7: ${data.gad7 || "—"}`,
       piez.phq9Gad7,
     ),
-    appendPiezime(
-      "PĀRRUNĀTS AR PACIENTU: Ar pacientu pārrunāta miega higiēna, izskaidrotas rekomendācijas, informēts par medikamentu lietošanas režīmu, nepieciešamību, blakus efektiem. Informēts par psiholoģiskā atbalsta saņemšanas iespējām.",
-      piez.parrunats,
-    ),
+    `PĀRRUNĀTS AR PACIENTU: ${piez.parrunats.trim() || parrunatsArPacientuDefault(dz)}`,
+    piez.diagnoze.trim() ? `DIAGNOZE: ${piez.diagnoze.trim()}` : null,
     "",
     "TAKTIKA",
     appendPiezime(

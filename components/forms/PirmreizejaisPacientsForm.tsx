@@ -95,6 +95,35 @@ export function PirmreizejaisPacientsForm() {
       <article className="doc-sheet min-w-0">
         <DocSectionTitle>Pacients un vizīte</DocSectionTitle>
 
+        <DocLine label="DZIMUMS">
+          <DocRadio
+            id="dz-virietis"
+            name="pacientaDzimums"
+            label="vīrietis"
+            value="virietis"
+            checked={data.pacientaDzimums === "virietis"}
+            onChange={(v) =>
+              update(
+                "pacientaDzimums",
+                v as PirmreizejaisPacientsData["pacientaDzimums"],
+              )
+            }
+          />
+          <DocRadio
+            id="dz-sieviete"
+            name="pacientaDzimums"
+            label="sieviete"
+            value="sieviete"
+            checked={data.pacientaDzimums === "sieviete"}
+            onChange={(v) =>
+              update(
+                "pacientaDzimums",
+                v as PirmreizejaisPacientsData["pacientaDzimums"],
+              )
+            }
+          />
+        </DocLine>
+
         <DocFieldBlock label="VĀRDS UZVĀRDS">
           <DocInlineInput
             id="vards"
@@ -1378,11 +1407,17 @@ export function PirmreizejaisPacientsForm() {
           />
         </DocLine>
 
-        <DocLine label="PĀRRUNĀTS AR PACIENTU" {...noteProps("parrunats")}>
-          <span className="text-[13px] text-zinc-600">
-            miega higiēna, rekomendācijas, medikamenti, psiholoģiskais atbalsts
-          </span>
-        </DocLine>
+        <DocLine
+          label="PĀRRUNĀTS AR PACIENTU"
+          {...noteProps("parrunats")}
+          notePlaceholder="miega higiēna, rekomendācijas, medikamenti, psiholoģiskais atbalsts"
+        />
+
+        <DocLine
+          label="DIAGNOZE"
+          {...noteProps("diagnoze")}
+          notePlaceholder="F41.2 Trauksme ar depresiju"
+        />
 
         <DocSectionTitle>Taktika</DocSectionTitle>
 

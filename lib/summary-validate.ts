@@ -94,10 +94,22 @@ function validatePirmreizejais(
   }
 
   if (
-    /DIAGNOZE:/i.test(summary) &&
+    /Diagnoze:/i.test(summary) &&
+    !fieldHasContent(serialized, "DIAGNOZE") &&
     !/XI DIAGNOZE:/i.test(serialized)
   ) {
     violations.push("invented Diagnoze section");
+  }
+
+  if (fieldHasContent(serialized, "DIAGNOZE")) {
+    const diagnozeMatch = serialized.match(/^DIAGNOZE:\s*(.+)$/m);
+    const diagnoze = diagnozeMatch?.[1]?.trim();
+    if (
+      diagnoze &&
+      !summary.toLowerCase().includes(diagnoze.toLowerCase())
+    ) {
+      violations.push("missing form diagnoze in summary");
+    }
   }
 
   return violations;
