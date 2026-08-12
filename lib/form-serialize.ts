@@ -83,15 +83,6 @@ export function serializePirmreizejaisPacients(
     "",
     "ANAMNĒZE",
     appendPiezime(
-      `DZIMIS ĢIMENĒ: ${genderLabelOrDash(
-        data.gimeneDzimis,
-        { pilna: "dzimis pilnā ģimenē", skirta: "dzimis šķirtā ģimenē" },
-        { pilna: "dzimusi pilnā ģimenē", skirta: "dzimusi šķirtā ģimenē" },
-        dz,
-      )}`,
-      piez.gimeneDzimis,
-    ),
-    appendPiezime(
       `DZEMDĪBAS: ${genderLabelOrDash(
         data.dzemdibasVeids,
         {

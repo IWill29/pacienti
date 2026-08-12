@@ -174,29 +174,6 @@ export function PirmreizejaisPacientsForm() {
 
         <DocSectionTitle>Anamnēze no pacienta</DocSectionTitle>
 
-        <DocLine label="DZIMIS ĢIMENĒ" {...noteProps("gimeneDzimis")}>
-          <DocRadio
-            id="gd-pilna"
-            name="gimeneDzimis"
-            label="pilnā"
-            value="pilna"
-            checked={data.gimeneDzimis === "pilna"}
-            onChange={(v) =>
-              update("gimeneDzimis", v as PirmreizejaisPacientsData["gimeneDzimis"])
-            }
-          />
-          <DocRadio
-            id="gd-skirta"
-            name="gimeneDzimis"
-            label="šķirtā"
-            value="skirta"
-            checked={data.gimeneDzimis === "skirta"}
-            onChange={(v) =>
-              update("gimeneDzimis", v as PirmreizejaisPacientsData["gimeneDzimis"])
-            }
-          />
-        </DocLine>
-
         <DocLine label="DZEMDĪBAS" {...noteProps("dzemdibasVeids")}>
           <DocRadio
             id="dz-dab"
