@@ -1434,14 +1434,11 @@ export function PirmreizejaisPacientsForm() {
           />
         </DocLine>
 
-        <DocLine label="2. IKDIEŅA">
-          <DocCheckbox
-            id="taktika-ikdiena"
-            label="darba-atpūtas režīms, fiziskas aktivitātes ≥1h/dienā, sabalansēts uzturs"
-            checked={data.taktikaIkdiena}
-            onChange={(c) => update("taktikaIkdiena", c)}
-          />
-        </DocLine>
+        <DocLine
+          label="2. IKDIENĀ"
+          {...noteProps("taktikaIkdiena")}
+          notePlaceholder="darba-atpūtas režīms, fiziskas aktivitātes ≥1h/dienā, sabalansēts uzturs"
+        />
 
         <DocLine
           label="3. MEDIKAMENTOZĀ TERAPIJA"

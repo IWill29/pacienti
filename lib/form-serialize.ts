@@ -429,9 +429,7 @@ export function serializePirmreizejaisPacients(
         .join(" ") || "—"}`,
       piez.taktikaUzraudziba,
     ),
-    data.taktikaIkdiena
-      ? "2. IKDIEŅA: Ikdienā ievērot sabalansētu darba-atpūtas režīmu, veikt fiziskas aktivitātes vismaz 1h/dienā, uzņemt sabalansētu uzturu!"
-      : null,
+    appendPiezime("2. IKDIENĀ:", piez.taktikaIkdiena),
     appendPiezime("3. MEDIKAMENTOZĀ TERAPIJA:", piez.taktikaMedikamenti),
     appendPiezime(
       `4. PSIHOLOĢISKAIS ATBALSTS: ${labelOrDash(data.taktikaPsiholoģija, {

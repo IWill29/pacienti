@@ -77,9 +77,10 @@ describe("serializePirmreizejaisPacients", () => {
         psihiatrs: true,
         cits: false,
       },
-      taktikaIkdiena: true,
       piezimes: {
         ...emptyPirmreizejaisPacients().piezimes,
+        taktikaIkdiena:
+          "Ikdienā ievērot sabalansētu darba-atpūtas režīmu, veikt fiziskas aktivitātes vismaz 1h/dienā, uzņemt sabalansētu uzturu",
         taktikaMedikamenti: "Escitalopram 10mg",
       },
     };
@@ -92,6 +93,7 @@ describe("serializePirmreizejaisPacients", () => {
     expect(serialized).toContain("PHQ9: 12");
     expect(serialized).toContain("GAD7: 8");
     expect(serialized).toContain("TAKTIKA");
+    expect(serialized).toContain("2. IKDIENĀ:");
     expect(serialized).toContain("Atrasties psihiatra uzraudzībā!");
     expect(serialized).toContain("Escitalopram 10mg");
   });

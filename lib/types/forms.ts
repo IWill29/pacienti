@@ -70,6 +70,7 @@ export type PirmreizejaisPiezimes = {
   parrunats: string;
   diagnoze: string;
   taktikaUzraudziba: string;
+  taktikaIkdiena: string;
   taktikaMedikamenti: string;
   taktikaPsiholoģija: string;
 };
@@ -127,6 +128,7 @@ export const emptyPirmreizejaisPiezimes = (): PirmreizejaisPiezimes => ({
   parrunats: "",
   diagnoze: "",
   taktikaUzraudziba: "",
+  taktikaIkdiena: "",
   taktikaMedikamenti: "",
   taktikaPsiholoģija: "",
 });
@@ -204,7 +206,6 @@ export type PirmreizejaisPacientsData = {
   gad7: string;
 
   taktikaUzraudziba: TaktikaUzraudziba;
-  taktikaIkdiena: boolean;
   taktikaPsiholoģija: "" | "psihologisks_atbalsts" | "psihoterapija";
 
   piezimes: PirmreizejaisPiezimes;
@@ -271,7 +272,6 @@ export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
   phq9: "",
   gad7: "",
   taktikaUzraudziba: emptyTaktikaUzraudziba(),
-  taktikaIkdiena: false,
   taktikaPsiholoģija: "",
   piezimes: emptyPirmreizejaisPiezimes(),
 });
