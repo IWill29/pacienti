@@ -57,7 +57,7 @@ describe("generateSummary fallback after MAX_SUMMARY_ATTEMPTS", () => {
     vi.restoreAllMocks();
   });
 
-  it("REGRESSION: should reject invented summary after max attempts instead of returning it", async () => {
+  it("returns a form-based summary instead of invented AI text after failed polish attempts", async () => {
     const fetchMock = vi
       .fn()
       .mockImplementation(() =>
@@ -67,11 +67,39 @@ describe("generateSummary fallback after MAX_SUMMARY_ATTEMPTS", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(
-      generateSummary("pirmreizejais", SERIALIZED_WITH_HIV_PIEZIME),
-    ).rejects.toThrow("Summary validation failed");
+    const summary = await generateSummary(
+      "pirmreizejais",
+      SERIALIZED_WITH_HIV_PIEZIME,
+    );
 
-    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(summary).toContain("HIV");
+    expect(summary).toContain("Testa Pacients");
+    expect(summary).not.toContain("F41.2");
+    expect(summary).not.toContain("Escitalopram");
+    expect(summary).not.toContain("ķeizargriezienu");
+    expect(
+      validateSummaryOutput(
+        "pirmreizejais",
+        SERIALIZED_WITH_HIV_PIEZIME,
+        summary,
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("returns the form-based summary when OpenRouter is unreachable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("network down")),
+    );
+
+    const summary = await generateSummary(
+      "pirmreizejais",
+      SERIALIZED_WITH_HIV_PIEZIME,
+    );
+
+    expect(summary).toContain("HIV");
+    expect(summary).not.toContain("F41.2");
   });
 
   it("returns immediately when first attempt passes validation", async () => {
