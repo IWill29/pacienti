@@ -4,7 +4,10 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { assemblePirmreizejaisSummary } from "@/lib/assemble-summary";
+import {
+  assemblePirmreizejaisSummary,
+  assembleProtokolsSummary,
+} from "@/lib/assemble-summary";
 import { serializePirmreizejaisPacients } from "@/lib/form-serialize";
 import { parrunatsArPacientuDefault } from "@/lib/gender-phrases";
 import { PIRMREIZEJAIS_PHRASE_BANK } from "@/lib/summary-prompts-phrases";
@@ -208,5 +211,89 @@ describe("clinical invention leaks — serialization and prompt phrase bank", ()
     );
 
     expect(validation.ok).toBe(false);
+  });
+});
+
+describe("clinical invention leaks — partial form edge cases", () => {
+  const SINGLE_ANAMNEZE_FIELD_SERIALIZED = [
+    "DZEMDĪBAS: dabīgās dzemdībās",
+    "DZEMDĪBU PATOLOĢIJA: —",
+    "AGRĪNĀ ATTĪSTĪBA: —",
+    "GIMENĒ PSIHISKAS SASLIMŠANAS: —",
+    "BLAKUS SASLIMŠANAS: —",
+    "LIETOTIE MEDIKAMENTI: NAV",
+    "SOMATISKI: —",
+    "NEIROLOĢISKI: —",
+  ].join("\n");
+
+  it("allows anamnēze matching the single filled form field", () => {
+    const summary = "Anamnēze no pacienta: Dzimis dabīgās dzemdībās.";
+
+    expect(
+      validateSummaryOutput(
+        "pirmreizejais",
+        SINGLE_ANAMNEZE_FIELD_SERIALIZED,
+        summary,
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("allows anamnēze when only dzemdības is marked in serialized form", () => {
+    const data = {
+      ...emptyPirmreizejaisPacients(),
+      pacientaVardsUzvards: "Testa Pacients",
+      dzemdibasVeids: "dabigas" as const,
+    };
+
+    const serialized = serializePirmreizejaisPacients(data);
+    const summary = "Anamnēze no pacienta: Dzimis dabīgās dzemdībās.";
+
+    expect(
+      validateSummaryOutput("pirmreizejais", serialized, summary).ok,
+    ).toBe(true);
+  });
+
+  it("accepts summary without Lietotie medikamenti when form says NAV", () => {
+    const summary = "Testa Pacients";
+
+    expect(
+      validateSummaryOutput(
+        "pirmreizejais",
+        MINIMAL_EMPTY_FORM_SERIALIZED,
+        summary,
+      ).ok,
+    ).toBe(true);
+  });
+
+  it("accepts protokols summary without Diagnoze when XI DIAGNOZE is —", () => {
+    const serialized = "XI DIAGNOZE: —\nII Īsa anamnēze/katamnēze:\n—";
+    const summary = "Psihiskais stāvoklis: Pie apziņas.";
+
+    expect(
+      validateSummaryOutput("protokols", serialized, summary).ok,
+    ).toBe(true);
+  });
+
+  it("assembled protokols summary omits Diagnoze when JSON diagnoze is null", () => {
+    const summary = assembleProtokolsSummary({
+      apskatesDatums: null,
+      anamneze: null,
+      psihoaktivasVielas: null,
+      psihiskaisStavoklis: ["Pie apziņas."],
+      somatiski: null,
+      neirologiski: null,
+      diagnoze: null,
+      parrunatsArPacientu: null,
+      taktika: null,
+    });
+
+    expect(summary).not.toMatch(/Diagnoze:/i);
+
+    const validation = validateSummaryOutput(
+      "protokols",
+      "XI DIAGNOZE: —\nII Īsa anamnēze/katamnēze:\n—",
+      summary,
+    );
+    expect(validation.ok).toBe(true);
   });
 });
