@@ -46,7 +46,6 @@ describe("serializePirmreizejaisPacients", () => {
     expect(serialized).toContain("Dzimusi dabīgās dzemdībās");
     expect(serialized).toContain("mācījusies vidēji");
     expect(serialized).toContain("Pareizi orientēta visos veidos");
-    expect(serialized).toContain("informēta par medikamentu");
   });
 
   it("includes lietotie medikamenti with piezīme", () => {

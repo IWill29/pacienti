@@ -10,9 +10,10 @@ JSON IZVADE (OBLIGĀTI):
 - Atgriez TIKAI vienu JSON objektu — bez markdown, bez komentāriem, bez teksta ārpus JSON
 - Katrs lauks: string, string[] (teikumi) vai null
 - null = formā nav datu šai sadaļai — NEIZDOMĀ saturu
+- Ja formas rindā ir "—" (nav aizpildīts), attiecīgais JSON lauks OBLIGĀTI ir null
 - Teikumu masīvos (anamneze, psihiskaisStavoklis u.c.) katrs elements = VIENS teikums, kas beidzas ar punktu
 - Izmanto TIKAI formas izvēles un piezīmes; ievēro šablona frāzes
-- NEKAD neizdomā faktus, diagnozes, medikamentus, vārdus vai datumus
+- NEKAD neizdomā faktus, F-kodu diagnozes, medikamentus, izmeklējumu atradnes vai datumus
 - NEIZMANTO kvadrātiekavas [ ]`;
 
 const PIRMREIZEJAIS_JSON_FIELDS = `

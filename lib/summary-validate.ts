@@ -6,11 +6,80 @@ export type SummaryValidationResult =
 
 const PLACEHOLDER_PATTERN = /\[[^\]]{2,}\]/;
 
+const ANAMNEZE_FORM_LABELS = [
+  "DZEMDĪBAS",
+  "DZEMDĪBU TERMINS",
+  "DZEMDĪBU PATOLOĢIJA",
+  "AGRĪNĀ ATTĪSTĪBA",
+  "AUGA",
+  "BĒRNUDĀRZS",
+  "RAKSTURS",
+  "SKOLĀ UZSĀKA",
+  "MĀCĪJĀS",
+  "APCELŠANA SKOLĀ",
+  "UZVEDĪBA SKOLĀ",
+  "IEGŪTĀ IZGLĪTĪBA",
+  "DARBS",
+  "ATTIECĪBU STATUSS",
+  "BĒRNI",
+  "GALVAS TRAUMAS",
+  "NEIROINFEKCIJAS",
+  "ALERĢIJAS",
+  "ALKOHOLS",
+  "PAV LIETOŠANA",
+  "PAV MĒĢINĀJIS DZĪVES LAIKĀ",
+  "SUICIDĀLA UZVEDĪBA",
+  "VIZĪTES IEMESLS",
+  "SŪDZAS",
+] as const;
+
+const PSIHISKAS_FORM_LABELS = [
+  "APZIŅA",
+  "ORIENTĀCIJA",
+  "KONTAKTS",
+  "SARUNAS INICIATĪVA",
+  "IZSKATS",
+  "RUNA",
+  "ATBILDES",
+  "STĀSTĪJUMS",
+  "UZMANĪBA",
+  "DOMĀŠANA",
+  "PSIHOPRODUKTĪVA SIMPTOMĀTIKA",
+  "GARASTĀVOKLIS",
+  "EMOCIONĀLĀS REAKCIJAS",
+  "TRAUKSME",
+  "INTELEKTS",
+  "SUICIDĀLAS DOMAS",
+  "MIEGS",
+  "KRITIKA",
+] as const;
+
 function extractPiezimes(serialized: string): string[] {
   const matches = [...serialized.matchAll(/\(piez\.:\s*([^)]+)\)/g)];
   return matches
     .map((match) => match[1]?.trim() ?? "")
     .filter((value) => value.length > 0);
+}
+
+function getFieldValue(serialized: string, label: string): string | null {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = serialized.match(new RegExp(`^${escaped}:\\s*(.+)$`, "m"));
+  if (!match) {
+    return null;
+  }
+  return match[1].replace(/\(piez\.:[^)]*\)/g, "").trim();
+}
+
+function fieldHasContent(serialized: string, label: string): boolean {
+  const value = getFieldValue(serialized, label);
+  return value !== null && value !== "" && value !== "—";
+}
+
+function anyFieldHasContent(
+  serialized: string,
+  labels: readonly string[],
+): boolean {
+  return labels.some((label) => fieldHasContent(serialized, label));
 }
 
 function hasSection(summary: string, heading: string): boolean {
@@ -22,15 +91,16 @@ function hasSection(summary: string, heading: string): boolean {
   return pattern.test(summary);
 }
 
-function fieldHasContent(serialized: string, label: string): boolean {
-  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = serialized.match(new RegExp(`^${escaped}:\\s*(.+)$`, "m"));
-  if (!match) {
-    return false;
-  }
-
-  const value = match[1].replace(/\(piez\.:[^)]*\)/g, "").trim();
-  return value !== "" && value !== "—";
+function extractSectionContent(
+  summary: string,
+  heading: string,
+): string | null {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `(?:^|\\n)\\s*(?:\\*\\*)?\\s*${escaped}\\s*(?:\\*\\*)?\\s*:\\s*([^\\n]+)`,
+    "i",
+  );
+  return pattern.exec(summary)?.[1]?.trim() ?? null;
 }
 
 function validatePirmreizejais(
@@ -57,6 +127,40 @@ function validatePirmreizejais(
   }
 
   if (
+    !anyFieldHasContent(serialized, ANAMNEZE_FORM_LABELS) &&
+    hasSection(summary, "Anamnēze no pacienta")
+  ) {
+    violations.push("invented Anamnēze section when form anamnēze fields are empty");
+  }
+
+  if (
+    /GIMENĒ PSIHISKAS SASLIMŠANAS:\s*NAV/i.test(serialized) &&
+    hasSection(summary, "Anamnēze no pacienta")
+  ) {
+    const anamneze = extractSectionContent(summary, "Anamnēze no pacienta");
+    if (
+      anamneze &&
+      /ģimen|schizofr|depresij|psihisk/i.test(anamneze) &&
+      !extractPiezimes(serialized).some((p) =>
+        anamneze.toLowerCase().includes(p.toLowerCase()),
+      )
+    ) {
+      violations.push(
+        "invented ģimenē psihiskas saslimšanas when form says NAV",
+      );
+    }
+  }
+
+  if (
+    !anyFieldHasContent(serialized, PSIHISKAS_FORM_LABELS) &&
+    hasSection(summary, "Psihiskais stāvoklis")
+  ) {
+    violations.push(
+      "invented Psihiskais stāvoklis section when form mental-status fields are empty",
+    );
+  }
+
+  if (
     fieldHasContent(serialized, "LIETOTIE MEDIKAMENTI") &&
     /LIETOTIE MEDIKAMENTI:\s*IR/i.test(serialized)
   ) {
@@ -75,13 +179,20 @@ function validatePirmreizejais(
     }
   }
 
+  if (/LIETOTIE MEDIKAMENTI:\s*NAV/i.test(serialized)) {
+    if (hasSection(summary, "Lietotie medikamenti")) {
+      const meds = extractSectionContent(summary, "Lietotie medikamenti");
+      if (meds && !/noliedz|nav/i.test(meds)) {
+        violations.push("invented medikamenti when form says NAV");
+      }
+    }
+  }
+
   if (
     /BLAKUS SASLIMŠANAS:\s*NAV/i.test(serialized) &&
     hasSection(summary, "Citas saslimšanas")
   ) {
-    const citas = summary.match(
-      /(?:^|\n)\s*(?:\*\*)?\s*Citas saslimšanas\s*(?:\*\*)?\s*:\s*([^\n]+)/i,
-    )?.[1];
+    const citas = extractSectionContent(summary, "Citas saslimšanas");
     if (
       citas &&
       !/noliedz|nav/i.test(citas) &&
@@ -94,6 +205,20 @@ function validatePirmreizejais(
   }
 
   if (
+    !fieldHasContent(serialized, "SOMATISKI") &&
+    hasSection(summary, "Somatiski")
+  ) {
+    violations.push("invented Somatiski section when form field is empty");
+  }
+
+  if (
+    !fieldHasContent(serialized, "NEIROLOĢISKI") &&
+    hasSection(summary, "Neiroloģiski")
+  ) {
+    violations.push("invented Neiroloģiski section when form field is empty");
+  }
+
+  if (
     /Diagnoze:/i.test(summary) &&
     !fieldHasContent(serialized, "DIAGNOZE") &&
     !/XI DIAGNOZE:/i.test(serialized)
@@ -102,8 +227,7 @@ function validatePirmreizejais(
   }
 
   if (fieldHasContent(serialized, "DIAGNOZE")) {
-    const diagnozeMatch = serialized.match(/^DIAGNOZE:\s*(.+)$/m);
-    const diagnoze = diagnozeMatch?.[1]?.trim();
+    const diagnoze = getFieldValue(serialized, "DIAGNOZE");
     if (
       diagnoze &&
       !summary.toLowerCase().includes(diagnoze.toLowerCase())
@@ -122,14 +246,20 @@ function validateProtokols(serialized: string, summary: string): string[] {
     violations.push("summary contains format-template placeholders");
   }
 
-  const diagnozeMatch = serialized.match(/^XI DIAGNOZE:\s*(.+)$/m);
-  const diagnoze = diagnozeMatch?.[1]?.trim();
+  const diagnoze = getFieldValue(serialized, "XI DIAGNOZE");
   if (
     diagnoze &&
     diagnoze !== "—" &&
     !summary.toLowerCase().includes(diagnoze.toLowerCase())
   ) {
     violations.push("missing form diagnoze in summary");
+  }
+
+  if (
+    /Diagnoze:/i.test(summary) &&
+    !fieldHasContent(serialized, "XI DIAGNOZE")
+  ) {
+    violations.push("invented Diagnoze section");
   }
 
   return violations;
