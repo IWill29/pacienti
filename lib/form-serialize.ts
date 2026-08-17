@@ -1,7 +1,6 @@
 import {
   formatPacientaDzimums,
   genderLabelOrDash,
-  parrunatsArPacientuDefault,
 } from "@/lib/gender-phrases";
 import type {
   PirmreizejaisPacientsData,
@@ -106,10 +105,9 @@ export function serializePirmreizejaisPacients(
       piez.dzemdibasTermins,
     ),
     appendPiezime(
-      `DZEMDĪBU PATOLOĢIJA: ${labelOrDash(data.dzemdibuPatologija, {
-        neatzime: "bez zināmiem sarežģījumiem",
-        ir: "ir dzemdību patoloģija",
-      })}`,
+      `DZEMDĪBU PATOLOĢIJA: ${
+        data.dzemdibuPatologija === "ir" ? "ir dzemdību patoloģija" : "—"
+      }`,
       piez.dzemdibuPatologija,
     ),
     appendPiezime(
@@ -409,7 +407,7 @@ export function serializePirmreizejaisPacients(
       `PHQ9: ${data.phq9 || "—"}; GAD7: ${data.gad7 || "—"}`,
       piez.phq9Gad7,
     ),
-    `PĀRRUNĀTS AR PACIENTU: ${piez.parrunats.trim() || parrunatsArPacientuDefault(dz)}`,
+    `PĀRRUNĀTS AR PACIENTU: ${piez.parrunats.trim() || "—"}`,
     piez.diagnoze.trim() ? `DIAGNOZE: ${piez.diagnoze.trim()}` : null,
     "",
     "TAKTIKA",

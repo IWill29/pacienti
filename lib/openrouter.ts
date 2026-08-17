@@ -97,8 +97,6 @@ export async function generateSummary(
     },
   ];
 
-  let lastSummary = "";
-
   for (let attempt = 0; attempt < MAX_SUMMARY_ATTEMPTS; attempt++) {
     const content = await callOpenRouter(apiKey, messages, formType);
     const violations: string[] = [];
@@ -108,7 +106,6 @@ export async function generateSummary(
       violations.push(...validateSummaryJsonStructure(formType, json));
 
       const summary = assembleSummary(formType, json);
-      lastSummary = summary;
 
       const textValidation = validateSummaryOutput(
         formType,
@@ -129,9 +126,6 @@ export async function generateSummary(
     }
 
     if (attempt === MAX_SUMMARY_ATTEMPTS - 1) {
-      if (lastSummary) {
-        return lastSummary;
-      }
       throw new OpenRouterError("Summary validation failed");
     }
 
