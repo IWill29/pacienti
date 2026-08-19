@@ -1,8 +1,92 @@
 import type { FormType } from "@/lib/types/forms";
 
+export type SummaryValidationMode = "strict" | "ai";
+
+export type SummaryValidationOptions = {
+  mode?: SummaryValidationMode;
+};
+
 export type SummaryValidationResult =
   | { ok: true }
   | { ok: false; violations: string[] };
+
+function significantWords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[\s,;:.!?()[\]"'-]+/)
+    .map((word) => word.trim())
+    .filter((word) => word.length >= 4);
+}
+
+function wordsOverlap(a: string, b: string): boolean {
+  if (a.includes(b) || b.includes(a)) {
+    return true;
+  }
+  const stemLength = Math.min(5, a.length, b.length);
+  return stemLength >= 4 && a.slice(0, stemLength) === b.slice(0, stemLength);
+}
+
+function wordReflectedInText(word: string, haystack: string): boolean {
+  if (haystack.includes(word)) {
+    return true;
+  }
+  return significantWords(haystack).some((candidate) =>
+    wordsOverlap(word, candidate),
+  );
+}
+
+function textReflectedInSummary(
+  summary: string,
+  text: string,
+  mode: SummaryValidationMode,
+): boolean {
+  const summaryLower = summary.toLowerCase();
+  const textLower = text.toLowerCase().trim();
+  if (!textLower) {
+    return true;
+  }
+  if (summaryLower.includes(textLower)) {
+    return true;
+  }
+  if (mode === "strict") {
+    return false;
+  }
+
+  const words = significantWords(textLower);
+  if (words.length === 0) {
+    return true;
+  }
+
+  const matched = words.filter((word) => wordReflectedInText(word, summaryLower));
+  const required = Math.max(1, Math.ceil(words.length * 0.35));
+  return matched.length >= required;
+}
+
+function sudzibasReflectedInSummary(
+  summary: string,
+  sudzas: string,
+  mode: SummaryValidationMode,
+): boolean {
+  if (textReflectedInSummary(summary, sudzas, mode)) {
+    return true;
+  }
+  if (mode === "strict") {
+    return false;
+  }
+
+  const fragments = sudzas
+    .split(/[,;]/)
+    .map((fragment) => fragment.trim())
+    .filter((fragment) => fragment.length >= 5);
+
+  if (fragments.length === 0) {
+    return true;
+  }
+
+  return fragments.every((fragment) =>
+    textReflectedInSummary(summary, fragment, "ai"),
+  );
+}
 
 const PLACEHOLDER_PATTERN = /\[[^\]]{2,}\]/;
 
@@ -171,13 +255,17 @@ function getTraceableTexts(
   return texts;
 }
 
-function sentenceTracesToForm(sentence: string, traceable: string[]): boolean {
+function sentenceTracesToForm(
+  sentence: string,
+  traceable: string[],
+  mode: SummaryValidationMode,
+): boolean {
   const normalized = sentence.toLowerCase().replace(/\.$/, "").trim();
   if (normalized.length === 0) {
     return true;
   }
 
-  return traceable.some((text) => {
+  const strictMatch = traceable.some((text) => {
     const fragment = text.toLowerCase().trim();
     if (fragment.length < 3) {
       return false;
@@ -188,6 +276,29 @@ function sentenceTracesToForm(sentence: string, traceable: string[]): boolean {
       normalized.includes(fragment.slice(0, Math.min(fragment.length, 12)))
     );
   });
+  if (strictMatch) {
+    return true;
+  }
+  if (mode === "strict") {
+    return false;
+  }
+
+  const sentenceWords = significantWords(normalized);
+  if (sentenceWords.length === 0) {
+    return true;
+  }
+
+  return traceable.some((text) => {
+    const traceWords = significantWords(text);
+    const overlap = sentenceWords.filter((word) =>
+      traceWords.some((traceWord) => wordsOverlap(word, traceWord)),
+    );
+    const required =
+      mode === "ai"
+        ? 1
+        : Math.min(2, sentenceWords.length);
+    return overlap.length >= required;
+  });
 }
 
 function validateSectionSentencesTraceToForm(
@@ -196,6 +307,7 @@ function validateSectionSentencesTraceToForm(
   serialized: string,
   formLabels: readonly string[],
   violationLabel: string,
+  mode: SummaryValidationMode,
 ): string | null {
   if (!hasSection(summary, sectionHeading)) {
     return null;
@@ -212,7 +324,7 @@ function validateSectionSentencesTraceToForm(
   }
 
   const untraced = splitSentences(content).filter(
-    (sentence) => !sentenceTracesToForm(sentence, traceable),
+    (sentence) => !sentenceTracesToForm(sentence, traceable, mode),
   );
 
   if (untraced.length > 0) {
@@ -249,6 +361,7 @@ function protokolsTaktikaHasContent(serialized: string): boolean {
 function validatePirmreizejais(
   serialized: string,
   summary: string,
+  mode: SummaryValidationMode,
 ): string[] {
   const violations: string[] = [];
 
@@ -257,7 +370,7 @@ function validatePirmreizejais(
   }
 
   for (const piezime of extractPiezimes(serialized)) {
-    if (!summary.toLowerCase().includes(piezime.toLowerCase())) {
+    if (!textReflectedInSummary(summary, piezime, mode)) {
       violations.push(`missing doctor piezīme in summary: "${piezime}"`);
     }
   }
@@ -271,7 +384,7 @@ function validatePirmreizejais(
 
   if (fieldHasContent(serialized, "SŪDZAS")) {
     const sudzas = getFieldValue(serialized, "SŪDZAS");
-    if (sudzas && !summary.toLowerCase().includes(sudzas.toLowerCase())) {
+    if (sudzas && !sudzibasReflectedInSummary(summary, sudzas, mode)) {
       violations.push("missing form sūdzības in summary");
     }
   }
@@ -289,6 +402,7 @@ function validatePirmreizejais(
     serialized,
     ANAMNEZE_FORM_LABELS,
     "anamnēze",
+    mode,
   );
   if (anamnezeTraceViolation) {
     violations.push(anamnezeTraceViolation);
@@ -327,6 +441,7 @@ function validatePirmreizejais(
     serialized,
     PSIHISKAS_FORM_LABELS,
     "psihiskais stāvoklis",
+    mode,
   );
   if (psihiskaisTraceViolation) {
     violations.push(psihiskaisTraceViolation);
@@ -342,7 +457,7 @@ function validatePirmreizejais(
     )?.[1];
     if (
       medPiezime &&
-      !summary.toLowerCase().includes(medPiezime.toLowerCase())
+      !textReflectedInSummary(summary, medPiezime, mode)
     ) {
       violations.push("missing lietotie medikamenti piezīme");
     }
@@ -394,7 +509,7 @@ function validatePirmreizejais(
     const parrunats = getFieldValue(serialized, "PĀRRUNĀTS AR PACIENTU");
     if (
       parrunats &&
-      !summary.toLowerCase().includes(parrunats.toLowerCase())
+      !textReflectedInSummary(summary, parrunats, mode)
     ) {
       violations.push("missing form pārrunāts ar pacientu in summary");
     }
@@ -427,7 +542,7 @@ function validatePirmreizejais(
     const diagnoze = getFieldValue(serialized, "DIAGNOZE");
     if (
       diagnoze &&
-      !summary.toLowerCase().includes(diagnoze.toLowerCase())
+      !textReflectedInSummary(summary, diagnoze, mode)
     ) {
       violations.push("missing form diagnoze in summary");
     }
@@ -500,10 +615,12 @@ export function validateSummaryOutput(
   formType: FormType,
   serialized: string,
   summary: string,
+  options: SummaryValidationOptions = {},
 ): SummaryValidationResult {
+  const mode = options.mode ?? "strict";
   const violations =
     formType === "pirmreizejais"
-      ? validatePirmreizejais(serialized, summary)
+      ? validatePirmreizejais(serialized, summary, mode)
       : validateProtokols(serialized, summary);
 
   if (violations.length > 0) {

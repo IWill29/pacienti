@@ -181,4 +181,24 @@ describe("validateSummaryOutput", () => {
       );
     }
   });
+
+  it("accepts paraphrased content in ai validation mode", () => {
+    expect(
+      validateSummaryOutput(
+        "pirmreizejais",
+        "SŪDZAS: nespēku, motivācijas trūkumu",
+        "**Vizītes iemesls:** Sakarā ar nespēku un motivācijas trūkumu.",
+        { mode: "ai" },
+      ).ok,
+    ).toBe(true);
+
+    expect(
+      validateSummaryOutput(
+        "pirmreizejais",
+        "RAKSTURS: atvērts (piez.: draugi bijuši)",
+        "**Anamnēze no pacienta:** Bijis komunikabls, veidojis draugus.",
+        { mode: "ai" },
+      ).ok,
+    ).toBe(true);
+  });
 });

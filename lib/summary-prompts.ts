@@ -8,10 +8,12 @@ export { PIRMREIZEJAIS_PHRASE_BANK } from "@/lib/summary-prompts-phrases";
 const JSON_OUTPUT_RULES = `
 JSON IZVADE (OBLIGĀTI):
 - Atgriez TIKAI vienu JSON objektu — bez markdown, bez komentāriem, bez teksta ārpus JSON
-- Katrs lauks: string, string[] (teikumi) vai null
+- Izmanto PRECĪZUS lauku nosaukumus (piem. lietotieMedikamenti, nevis lietošieMedikamenti)
+- Masīvu lauki (vizitesIemesls, anamneze, psihoaktivasVielas, psihiskaisStavoklis, taktika) — TIKAI JSON masīvs ["Teikums."] vai null; NEKAD vienkārša string
+- Vienvirknes lauki (citasSaslimbas, diagnoze u.c.) — TIKAI string vai null; NEKAD objekts
 - null = formā nav datu šai sadaļai — NEIZDOMĀ saturu
 - Ja formas rindā ir "—" (nav aizpildīts), attiecīgais JSON lauks OBLIGĀTI ir null
-- Teikumu masīvos (anamneze, psihiskaisStavoklis u.c.) katrs elements = VIENS teikums, kas beidzas ar punktu
+- Teikumu masīvos katrs elements = VIENS teikums, kas beidzas ar punktu
 - Izmanto TIKAI formas izvēles un piezīmes; ievēro šablona frāzes
 - NEKAD neizdomā faktus, F-kodu diagnozes, medikamentus, izmeklējumu atradnes vai datumus
 - NEIZMANTO kvadrātiekavas [ ]`;

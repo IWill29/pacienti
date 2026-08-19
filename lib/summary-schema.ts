@@ -152,6 +152,170 @@ function stripJsonFence(content: string): string {
   return fenceMatch ? fenceMatch[1].trim() : trimmed;
 }
 
+const PIRMREIZEJAIS_ARRAY_FIELDS = [
+  "vizitesIemesls",
+  "anamneze",
+  "psihoaktivasVielas",
+  "psihiskaisStavoklis",
+  "taktika",
+] as const;
+
+const PROTOKOLS_ARRAY_FIELDS = [
+  "anamneze",
+  "psihoaktivasVielas",
+  "psihiskaisStavoklis",
+  "taktika",
+] as const;
+
+/** Common AI typos / Latvian diacritic variants → canonical JSON keys. */
+const FIELD_ALIASES: Record<string, string> = {
+  lietošieMedikamenti: "lietotieMedikamenti",
+  lietotasMedikamenti: "lietotieMedikamenti",
+  lietotāsMedikamenti: "lietotieMedikamenti",
+  parrunats: "parrunatsArPacientu",
+  parrunātsArPacientu: "parrunatsArPacientu",
+  vizītesIemesls: "vizitesIemesls",
+  psihiskaisStāvoklis: "psihiskaisStavoklis",
+  psihoaktīvāsVielas: "psihoaktivasVielas",
+};
+
+function coerceObjectToString(value: Record<string, unknown>): string | null {
+  for (const key of ["value", "text", "content", "apraksts"]) {
+    const candidate = value[key];
+    if (typeof candidate === "string") {
+      const trimmed = candidate.trim();
+      if (trimmed.length > 0) {
+        return trimmed;
+      }
+    }
+  }
+
+  const strings = Object.values(value).filter(
+    (entry): entry is string => typeof entry === "string",
+  );
+  if (strings.length === 0) {
+    return null;
+  }
+  return strings.map((entry) => entry.trim()).filter(Boolean).join(" ") || null;
+}
+
+function coerceToStringValue(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    const joined = value
+      .filter((entry): entry is string => typeof entry === "string")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .join(" ");
+    return joined.length > 0 ? joined : null;
+  }
+  if (typeof value === "object") {
+    return coerceObjectToString(value as Record<string, unknown>);
+  }
+  return null;
+}
+
+function ensureSentence(text: string): string {
+  const trimmed = text.trim();
+  if (/[.!?]$/.test(trimmed)) {
+    return trimmed;
+  }
+  return `${trimmed}.`;
+}
+
+function coerceToStringArrayValue(value: unknown): string[] | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => {
+        if (typeof entry === "string") {
+          return entry.trim();
+        }
+        return coerceToStringValue(entry);
+      })
+      .filter((entry): entry is string => Boolean(entry))
+      .map(ensureSentence);
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? [ensureSentence(trimmed)] : null;
+  }
+  const coerced = coerceToStringValue(value);
+  return coerced ? [ensureSentence(coerced)] : null;
+}
+
+/** Normalize common AI JSON shape mistakes before strict parsing. */
+export function normalizeSummaryJsonRecord(
+  formType: FormType,
+  raw: Record<string, unknown>,
+): Record<string, unknown> {
+  const normalized: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(raw)) {
+    const canonicalKey = FIELD_ALIASES[key] ?? key;
+    normalized[canonicalKey] = value;
+  }
+
+  const arrayFields =
+    formType === "pirmreizejais"
+      ? PIRMREIZEJAIS_ARRAY_FIELDS
+      : PROTOKOLS_ARRAY_FIELDS;
+
+  for (const field of arrayFields) {
+    if (field in normalized) {
+      normalized[field] = coerceToStringArrayValue(normalized[field]);
+    }
+  }
+
+  if (formType === "pirmreizejais") {
+    for (const field of [
+      "pacientaVardsUzvards",
+      "personasKods",
+      "konsultacijasDatums",
+      "citasSaslimbas",
+      "lietotieMedikamenti",
+      "galvasTraumas",
+      "neiroinfekcijas",
+      "alergijas",
+      "somatiski",
+      "neirologiski",
+      "phq9",
+      "gad7",
+      "parrunatsArPacientu",
+      "diagnoze",
+    ] as const) {
+      if (field in normalized) {
+        normalized[field] = coerceToStringValue(normalized[field]);
+      }
+    }
+  } else {
+    for (const field of [
+      "apskatesDatums",
+      "somatiski",
+      "neirologiski",
+      "diagnoze",
+      "parrunatsArPacientu",
+    ] as const) {
+      if (field in normalized) {
+        normalized[field] = coerceToStringValue(normalized[field]);
+      }
+    }
+  }
+
+  return normalized;
+}
+
 export function parseSummaryJson(
   formType: FormType,
   rawContent: string,
@@ -167,7 +331,10 @@ export function parseSummaryJson(
     throw new Error("summary JSON must be an object");
   }
 
-  const record = parsed as Record<string, unknown>;
+  const record = normalizeSummaryJsonRecord(
+    formType,
+    parsed as Record<string, unknown>,
+  );
 
   if (formType === "pirmreizejais") {
     return {

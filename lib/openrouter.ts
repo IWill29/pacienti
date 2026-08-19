@@ -145,6 +145,7 @@ export async function generateSummary(
           formType,
           serializedForm,
           summary,
+          { mode: "ai" },
         );
         if (!textValidation.ok) {
           violations.push(...textValidation.violations);
