@@ -24,4 +24,8 @@ Psihiskais stāvoklis — TEIKUMI (katrs elements masīvā; ievēro PACIENTA DZI
 - DOMĀŠANA secīga → "Domāšana secīga, spriedumi loģiski."
 - PSIHOPRODUKTĪVA nenovēro → vīr.: "Akūtu psihoproduktīvu simptomātiku (murgus, halucinācijas) nepauž." / siev.: "...nepauž."
 - SUICIDĀLAS DOMAS noliedz → "Suicidālas domas noliedz."
-- KRITIKA ir → "Kritika pietiekama."`;
+- KRITIKA ir → "Kritika pietiekama."
+
+Vizītes iemesls — TEIKUMI (JSON lauks vizitesIemesls, NE psihiskaisStavoklis):
+- SŪDZAS (formas piezīme) → vizitesIemesls masīvā: "Sakarā ar [sūdzības]." (NEKĀDĀ GADĪJUMĀ neliec sūdzības psihiskaisStavoklis masīvā)
+- VIZĪTES IEMESLS pirmo reizi → "Pie psihiatra pirmo reizi dzīvē." (+ piezīme ja ir)`;

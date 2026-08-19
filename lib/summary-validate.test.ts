@@ -100,7 +100,7 @@ describe("validateSummaryOutput", () => {
     ).toBe(true);
   });
 
-  it("requires Vizītes iemesls when form has it", () => {
+  it("requires Vizītes iemesls when form has visit reason", () => {
     const serialized = "VIZĪTES IEMESLS: pirmo reizi dzīvē (piez.: bezmiegs)";
 
     const result = validateSummaryOutput(
@@ -112,6 +112,73 @@ describe("validateSummaryOutput", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.violations).toContain("missing Vizītes iemesls section");
+    }
+  });
+
+  it("requires Vizītes iemesls when form has sūdzības only", () => {
+    const serialized = "SŪDZAS: trauksme, miega traucējumi";
+
+    const result = validateSummaryOutput(
+      "pirmreizejais",
+      serialized,
+      "Anamnēze no pacienta: trauksme.",
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.violations).toContain("missing Vizītes iemesls section");
+    }
+  });
+
+  it("rejects partial anamnēze invention beyond filled fields", () => {
+    const serialized = "DZEMDĪBAS: Dzimis dabīgās dzemdībās";
+    const summary =
+      "Anamnēze no pacienta: Dzimis dabīgās dzemdībās. Bērnudārzu apmeklēja.";
+
+    const result = validateSummaryOutput("pirmreizejais", serialized, summary);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(
+        result.violations.some((v) => v.includes("not traceable")),
+      ).toBe(true);
+    }
+  });
+
+  it("rejects invented protokols sections when form is empty", () => {
+    const serialized = "II Īsa anamnēze/katamnēze: —\nXI DIAGNOZE: —";
+
+    expect(
+      validateSummaryOutput(
+        "protokols",
+        serialized,
+        "Anamnēze no pacienta: Izgudrots.",
+      ).ok,
+    ).toBe(false);
+
+    expect(
+      validateSummaryOutput(
+        "protokols",
+        serialized,
+        "Psihiskais stāvoklis: Pie apziņas.",
+      ).ok,
+    ).toBe(false);
+  });
+
+  it("rejects Psihiskais stāvoklis when only sūdzības are filled", () => {
+    const serialized = "SŪDZAS: trauksme, miega traucējumi";
+
+    const result = validateSummaryOutput(
+      "pirmreizejais",
+      serialized,
+      "**Psihiskais stāvoklis:** Trauksme, miega traucējumi.",
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.violations).toContain(
+        "invented Psihiskais stāvoklis section when form mental-status fields are empty",
+      );
     }
   });
 });

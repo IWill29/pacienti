@@ -38,6 +38,13 @@ function isEmptyValue(value: string): boolean {
   return value === "" || value === "—";
 }
 
+/** True when a value is only em-dashes, commas, and whitespace (no clinical content). */
+function isPlaceholderOnly(value: string): boolean {
+  const withoutLabels = value.replace(/\b[\p{L}]+:/gu, "");
+  const normalized = withoutLabels.replace(/[\s,;—-]+/g, "");
+  return normalized.length === 0;
+}
+
 function toSentence(text: string): string {
   const trimmed = text.trim();
   if (!trimmed) {
@@ -126,7 +133,6 @@ const PSIHISKAS_LABELS = [
   "RUNA",
   "ATBILDES",
   "STĀSTĪJUMS",
-  "SŪDZAS",
   "UZMANĪBA",
   "DOMĀŠANA",
   "PSIHOPRODUKTĪVA SIMPTOMĀTIKA",
@@ -151,6 +157,39 @@ const TAKTIKA_LABELS = [
   "3. MEDIKAMENTOZĀ TERAPIJA",
   "4. PSIHOLOĢISKAIS ATBALSTS",
 ] as const;
+
+function formatSudzasSentence(text: string): string {
+  const trimmed = text.trim();
+  if (/^sakarā ar/i.test(trimmed)) {
+    return toSentence(trimmed);
+  }
+  return toSentence(`Sakarā ar ${trimmed}`);
+}
+
+/** Visit reason + patient complaints belong under Vizītes iemesls, not mental status. */
+function buildVizitesIemesls(lines: FormLine[]): string[] | null {
+  const vizite = findLine(lines, "VIZĪTES IEMESLS");
+  const sudzas = findLine(lines, "SŪDZAS");
+  const sentences: string[] = [];
+
+  if (vizite && (!isEmptyValue(vizite.value) || vizite.piezime)) {
+    const mapped = !isEmptyValue(vizite.value)
+      ? vizite.value.toLowerCase().includes("pirmo reizi")
+        ? `Pie psihiatra ${vizite.value}`
+        : vizite.value
+      : "";
+    const visitSentence = combineValueAndNote(mapped, vizite.piezime);
+    if (visitSentence) {
+      sentences.push(visitSentence);
+    }
+  }
+
+  if (sudzas && !isEmptyValue(sudzas.value)) {
+    sentences.push(formatSudzasSentence(sudzas.value));
+  }
+
+  return sentences.length > 0 ? sentences : null;
+}
 
 function parsePhqGad(lines: FormLine[]): { phq9: string | null; gad7: string | null } {
   const line = findLine(lines, "PHQ9");
@@ -186,16 +225,7 @@ function buildPirmreizejaisCanonical(
     ...(familySentence ? [familySentence] : []),
   ];
 
-  const vizite = findLine(lines, "VIZĪTES IEMESLS");
-  let vizitesIemesls: string[] | null = null;
-  if (vizite && (!isEmptyValue(vizite.value) || vizite.piezime)) {
-    const mapped = !isEmptyValue(vizite.value)
-      ? vizite.value.toLowerCase().includes("pirmo reizi")
-        ? `Pie psihiatra ${vizite.value}`
-        : vizite.value
-      : "";
-    vizitesIemesls = [combineValueAndNote(mapped, vizite.piezime)];
-  }
+  const vizitesIemesls = buildVizitesIemesls(lines);
 
   return {
     pacientaVardsUzvards: lineContent(findLine(lines, "VĀRDS UZVĀRDS"))?.replace(
@@ -241,7 +271,7 @@ function nonemptyProtokolsLine(line: FormLine): boolean {
   if (isEmptyValue(line.value)) {
     return false;
   }
-  if (/^[-—]+$/.test(line.value)) {
+  if (/^[-—]+$/.test(line.value) || isPlaceholderOnly(line.value)) {
     return false;
   }
   return true;
@@ -277,8 +307,7 @@ function buildProtokolsCanonical(serialized: string): ProtokolsSummaryJson {
   const taktika = lines.filter(
     (line) =>
       nonemptyProtokolsLine(line) &&
-      (/Tālākā taktika|turpināt|stacion|XIII/i.test(line.label) ||
-        /turpināt|stacion/i.test(line.value)),
+      /Tālākā taktika|^XIII/i.test(line.label),
   );
 
   const dateLine = serialized.match(

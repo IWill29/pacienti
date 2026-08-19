@@ -19,7 +19,6 @@ export const emptyTaktikaUzraudziba = (): TaktikaUzraudziba => ({
 /** Comment keys for every pirmreizējais section — doctor free text. */
 export type PirmreizejaisPiezimes = {
   vizitesIemesls: string;
-  gimeneDzimis: string;
   dzemdibasVeids: string;
   dzemdibasTermins: string;
   dzemdibuPatologija: string;
@@ -77,7 +76,6 @@ export type PirmreizejaisPiezimes = {
 
 export const emptyPirmreizejaisPiezimes = (): PirmreizejaisPiezimes => ({
   vizitesIemesls: "",
-  gimeneDzimis: "",
   dzemdibasVeids: "",
   dzemdibasTermins: "",
   dzemdibuPatologija: "",
@@ -140,7 +138,6 @@ export type PirmreizejaisPacientsData = {
   vizitesDatums: string;
   vizitesIemesls: "" | "pirmo_reizi" | "atkartoti";
 
-  gimeneDzimis: "" | "pilna" | "skirta";
   dzemdibasVeids: "" | "dabigas" | "keizargrieziens";
   dzemdibasTermins: "" | "laicigi" | "prieksalicigi" | "noveloti";
   dzemdibuPatologija: "" | "neatzime" | "ir";
@@ -152,7 +149,6 @@ export type PirmreizejaisPacientsData = {
   sekmes: "" | "slikti" | "videji" | "labi";
   apcelsanaSkola: "" | "netika" | "tika";
   uzvedibaSkola: "" | "apmierinosa" | "traucejumi";
-  iegutaIzglitiba: string;
   darbs: "" | "nestrada" | "strada";
   attiecibuStatuss: "" | "precejies" | "dzivo_viens";
   bern: IrNav;
@@ -217,7 +213,6 @@ export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
   pacientaDzimums: "",
   vizitesDatums: "",
   vizitesIemesls: "",
-  gimeneDzimis: "",
   dzemdibasVeids: "",
   dzemdibasTermins: "",
   dzemdibuPatologija: "",
@@ -229,7 +224,6 @@ export const emptyPirmreizejaisPacients = (): PirmreizejaisPacientsData => ({
   sekmes: "",
   apcelsanaSkola: "",
   uzvedibaSkola: "",
-  iegutaIzglitiba: "",
   darbs: "",
   attiecibuStatuss: "",
   bern: "",

@@ -67,22 +67,23 @@ describe("generateSummary fallback after MAX_SUMMARY_ATTEMPTS", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
 
-    const summary = await generateSummary(
+    const result = await generateSummary(
       "pirmreizejais",
       SERIALIZED_WITH_HIV_PIEZIME,
     );
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(summary).toContain("HIV");
-    expect(summary).toContain("Testa Pacients");
-    expect(summary).not.toContain("F41.2");
-    expect(summary).not.toContain("Escitalopram");
-    expect(summary).not.toContain("ķeizargriezienu");
+    expect(result.source).toBe("canonical");
+    expect(result.summary).toContain("HIV");
+    expect(result.summary).toContain("Testa Pacients");
+    expect(result.summary).not.toContain("F41.2");
+    expect(result.summary).not.toContain("Escitalopram");
+    expect(result.summary).not.toContain("ķeizargriezienu");
     expect(
       validateSummaryOutput(
         "pirmreizejais",
         SERIALIZED_WITH_HIV_PIEZIME,
-        summary,
+        result.summary,
       ).ok,
     ).toBe(true);
   });
@@ -93,13 +94,14 @@ describe("generateSummary fallback after MAX_SUMMARY_ATTEMPTS", () => {
       vi.fn().mockRejectedValue(new Error("network down")),
     );
 
-    const summary = await generateSummary(
+    const result = await generateSummary(
       "pirmreizejais",
       SERIALIZED_WITH_HIV_PIEZIME,
     );
 
-    expect(summary).toContain("HIV");
-    expect(summary).not.toContain("F41.2");
+    expect(result.source).toBe("canonical");
+    expect(result.summary).toContain("HIV");
+    expect(result.summary).not.toContain("F41.2");
   });
 
   it("returns immediately when first attempt passes validation", async () => {
@@ -121,19 +123,70 @@ describe("generateSummary fallback after MAX_SUMMARY_ATTEMPTS", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
 
-    const summary = await generateSummary(
+    const result = await generateSummary(
       "pirmreizejais",
       SERIALIZED_WITH_HIV_PIEZIME,
     );
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(summary).toContain("HIV");
+    expect(result.source).toBe("ai");
+    expect(result.summary).toContain("HIV");
     expect(
       validateSummaryOutput(
         "pirmreizejais",
         SERIALIZED_WITH_HIV_PIEZIME,
-        summary,
+        result.summary,
       ).ok,
     ).toBe(true);
+  });
+
+  it("returns canonical protokols summary when OpenRouter fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("network down")),
+    );
+
+    const serialized = [
+      "PSIHIATRISKĀ APSKATE",
+      "II Īsa anamnēze/katamnēze: Pacients hospitalizēts pēc pašnāvības mēģinājuma.",
+      "1. Apziņa: skaidra",
+      "XI DIAGNOZE: F32.1",
+      "XIII Tālākā taktika: turpināt ārstēšanu ambulatori",
+    ].join("\n");
+
+    const result = await generateSummary("protokols", serialized);
+
+    expect(result.source).toBe("canonical");
+    expect(result.summary).toContain("pašnāvības mēģinājuma");
+    expect(result.summary).toContain("F32.1");
+    expect(result.summary).toMatch(/Taktika:/i);
+    expect(
+      validateSummaryOutput("protokols", serialized, result.summary).ok,
+    ).toBe(true);
+  });
+
+  it("retries with feedback when OpenRouter returns empty content", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: async () => ({ choices: [{ message: { content: "" } }] }),
+        } as Response),
+      )
+      .mockImplementation(() =>
+        Promise.resolve(
+          mockOpenRouterResponse(JSON.stringify(INVENTED_SUMMARY_JSON)),
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await generateSummary(
+      "pirmreizejais",
+      SERIALIZED_WITH_HIV_PIEZIME,
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.source).toBe("canonical");
   });
 });

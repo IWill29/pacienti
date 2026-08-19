@@ -27,6 +27,7 @@ describe("validateSummaryRequest", () => {
   it("serializes pirmreizejais form when at least one field is filled", () => {
     const formData = {
       ...emptyPirmreizejaisPacients(),
+      pacientaDzimums: "virietis" as const,
       dzemdibasVeids: "dabigas" as const,
     };
 
@@ -40,5 +41,30 @@ describe("validateSummaryRequest", () => {
       expect(result.formType).toBe("pirmreizejais");
       expect(result.serialized).toContain("Dzimis dabīgās dzemdībās");
     }
+  });
+
+  it("rejects pirmreizejais form without pacienta dzimums", () => {
+    expect(
+      validateSummaryRequest({
+        formType: "pirmreizejais",
+        formData: {
+          ...emptyPirmreizejaisPacients(),
+          dzemdibasVeids: "dabigas",
+        },
+      }).ok,
+    ).toBe(false);
+  });
+
+  it("rejects malformed pirmreizejais form missing nested objects", () => {
+    expect(
+      validateSummaryRequest({
+        formType: "pirmreizejais",
+        formData: {
+          pacientaVardsUzvards: "Testa Pacients",
+          pacientaDzimums: "virietis",
+          dzemdibasVeids: "dabigas",
+        },
+      }).ok,
+    ).toBe(false);
   });
 });

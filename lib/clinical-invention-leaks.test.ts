@@ -122,7 +122,7 @@ describe("clinical invention leaks — validateSummaryOutput gaps", () => {
   });
 
   it("REGRESSION: rejects invented protokols diagnoze when XI DIAGNOZE is —", () => {
-    const serialized = "XI DIAGNOZE: —\nII Īsa anamnēze/katamnēze:\n—";
+    const serialized = "XI DIAGNOZE: —\nII Īsa anamnēze/katamnēze: —";
     const summary = "Diagnoze: F20.0 Paranoid schizophrenia";
 
     const result = validateSummaryOutput("protokols", serialized, summary);
@@ -241,6 +241,7 @@ describe("clinical invention leaks — partial form edge cases", () => {
   it("allows anamnēze when only dzemdības is marked in serialized form", () => {
     const data = {
       ...emptyPirmreizejaisPacients(),
+      pacientaDzimums: "virietis" as const,
       pacientaVardsUzvards: "Testa Pacients",
       dzemdibasVeids: "dabigas" as const,
     };
@@ -266,8 +267,9 @@ describe("clinical invention leaks — partial form edge cases", () => {
   });
 
   it("accepts protokols summary without Diagnoze when XI DIAGNOZE is —", () => {
-    const serialized = "XI DIAGNOZE: —\nII Īsa anamnēze/katamnēze:\n—";
-    const summary = "Psihiskais stāvoklis: Pie apziņas.";
+    const serialized =
+      "II Īsa anamnēze/katamnēze: —\nXI DIAGNOZE: —\n1. Apziņa: skaidra";
+    const summary = "Psihiskais stāvoklis: skaidra.";
 
     expect(
       validateSummaryOutput("protokols", serialized, summary).ok,
@@ -279,7 +281,7 @@ describe("clinical invention leaks — partial form edge cases", () => {
       apskatesDatums: null,
       anamneze: null,
       psihoaktivasVielas: null,
-      psihiskaisStavoklis: ["Pie apziņas."],
+      psihiskaisStavoklis: ["skaidra."],
       somatiski: null,
       neirologiski: null,
       diagnoze: null,
@@ -291,7 +293,7 @@ describe("clinical invention leaks — partial form edge cases", () => {
 
     const validation = validateSummaryOutput(
       "protokols",
-      "XI DIAGNOZE: —\nII Īsa anamnēze/katamnēze:\n—",
+      "XI DIAGNOZE: —\nII Īsa anamnēze/katamnēze: —\n1. Apziņa: skaidra",
       summary,
     );
     expect(validation.ok).toBe(true);

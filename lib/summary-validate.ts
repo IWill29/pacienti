@@ -22,6 +22,7 @@ const ANAMNEZE_FORM_LABELS = [
   "DARBS",
   "ATTIECĪBU STATUSS",
   "BĒRNI",
+  "ĢIMENĒ PSIHISKAS SASLIMŠANAS",
   "GALVAS TRAUMAS",
   "NEIROINFEKCIJAS",
   "ALERĢIJAS",
@@ -29,9 +30,9 @@ const ANAMNEZE_FORM_LABELS = [
   "PAV LIETOŠANA",
   "PAV MĒĢINĀJIS DZĪVES LAIKĀ",
   "SUICIDĀLA UZVEDĪBA",
-  "VIZĪTES IEMESLS",
-  "SŪDZAS",
 ] as const;
+
+const VIZITE_FORM_LABELS = ["VIZĪTES IEMESLS", "SŪDZAS"] as const;
 
 const PSIHISKAS_FORM_LABELS = [
   "APZIŅA",
@@ -54,6 +55,16 @@ const PSIHISKAS_FORM_LABELS = [
   "KRITIKA",
 ] as const;
 
+const TAKTIKA_FORM_LABELS = [
+  "1. UZRAUDZĪBA",
+  "2. IKDIENĀ",
+  "3. MEDIKAMENTOZĀ TERAPIJA",
+  "4. PSIHOLOĢISKAIS ATBALSTS",
+] as const;
+
+const PROTOKOLS_MENTAL_LABEL_PREFIX =
+  /^(1\. Apziņa|2\. Orientācija|3\. Kontakts|4\. Atbild|5\. Runa|6\. Uztveres|7\. Halucinācijas|8\. Pārvērtēšanas|9\. Ideju|10\. Formālās|11\. Emocionālās|12\. Garastāvoklis|13\. Trauksme|14\. Uzmanība|15\. Intelekts|16\. Suicidālas|17\. Miegs|18\. Kritika)/i;
+
 function extractPiezimes(serialized: string): string[] {
   const matches = [...serialized.matchAll(/\(piez\.:\s*([^)]+)\)/g)];
   return matches
@@ -63,16 +74,25 @@ function extractPiezimes(serialized: string): string[] {
 
 function getFieldValue(serialized: string, label: string): string | null {
   const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = serialized.match(new RegExp(`^${escaped}:\\s*(.+)$`, "m"));
+  const match = serialized.match(
+    new RegExp(`^${escaped}:[ \\t]*([^\\n]*)$`, "m"),
+  );
   if (!match) {
     return null;
   }
-  return match[1].replace(/\(piez\.:[^)]*\)/g, "").trim();
+  const value = match[1].replace(/\(piez\.:[^)]*\)/g, "").trim();
+  return value.length > 0 ? value : null;
 }
 
 function fieldHasContent(serialized: string, label: string): boolean {
   const value = getFieldValue(serialized, label);
   return value !== null && value !== "" && value !== "—";
+}
+
+function isPlaceholderOnly(value: string): boolean {
+  const withoutLabels = value.replace(/\b[\p{L}]+:/gu, "");
+  const normalized = withoutLabels.replace(/[\s,;—-]+/g, "");
+  return normalized.length === 0;
 }
 
 function anyFieldHasContent(
@@ -97,10 +117,133 @@ function extractSectionContent(
 ): string | null {
   const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const pattern = new RegExp(
-    `(?:^|\\n)\\s*(?:\\*\\*)?\\s*${escaped}\\s*(?:\\*\\*)?\\s*:\\s*([^\\n]+)`,
+    `(?:^|\\n)\\s*(?:\\*\\*)?\\s*${escaped}\\s*(?:\\*\\*)?\\s*:\\s*([^\\n]+(?:\\n(?!\\s*(?:\\*\\*)?[A-ZĀČĒĢĪĶĻŅŠŪŽ][^:\\n]{0,40}:)[^\\n]+)*)`,
     "i",
   );
   return pattern.exec(summary)?.[1]?.trim() ?? null;
+}
+
+function splitSentences(text: string): string[] {
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length > 0);
+}
+
+function phqGadScores(serialized: string): { phq9: string | null; gad7: string | null } {
+  const line = getFieldValue(serialized, "PHQ9");
+  if (!line) {
+    return { phq9: null, gad7: null };
+  }
+
+  const phq9Raw = line.match(/^PHQ9:\s*([^;]+)/i)?.[1]?.trim()
+    ?? line.split(";")[0]?.trim()
+    ?? null;
+  const gad7Raw = line.match(/GAD7:\s*(.+)$/i)?.[1]?.trim() ?? null;
+
+  return {
+    phq9: phq9Raw && phq9Raw !== "—" ? phq9Raw : null,
+    gad7: gad7Raw && gad7Raw !== "—" ? gad7Raw : null,
+  };
+}
+
+function getTraceableTexts(
+  serialized: string,
+  labels: readonly string[],
+): string[] {
+  const texts: string[] = [];
+
+  for (const label of labels) {
+    const value = getFieldValue(serialized, label);
+    if (value && value !== "—") {
+      texts.push(value);
+    }
+
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const piezMatch = serialized.match(
+      new RegExp(`^${escaped}:.*\\(piez\\.:\\s*([^)]+)\\)`, "m"),
+    );
+    if (piezMatch?.[1]?.trim()) {
+      texts.push(piezMatch[1].trim());
+    }
+  }
+
+  return texts;
+}
+
+function sentenceTracesToForm(sentence: string, traceable: string[]): boolean {
+  const normalized = sentence.toLowerCase().replace(/\.$/, "").trim();
+  if (normalized.length === 0) {
+    return true;
+  }
+
+  return traceable.some((text) => {
+    const fragment = text.toLowerCase().trim();
+    if (fragment.length < 3) {
+      return false;
+    }
+    return (
+      normalized.includes(fragment) ||
+      fragment.includes(normalized) ||
+      normalized.includes(fragment.slice(0, Math.min(fragment.length, 12)))
+    );
+  });
+}
+
+function validateSectionSentencesTraceToForm(
+  summary: string,
+  sectionHeading: string,
+  serialized: string,
+  formLabels: readonly string[],
+  violationLabel: string,
+): string | null {
+  if (!hasSection(summary, sectionHeading)) {
+    return null;
+  }
+
+  const traceable = getTraceableTexts(serialized, formLabels);
+  if (traceable.length === 0) {
+    return null;
+  }
+
+  const content = extractSectionContent(summary, sectionHeading);
+  if (!content) {
+    return null;
+  }
+
+  const untraced = splitSentences(content).filter(
+    (sentence) => !sentenceTracesToForm(sentence, traceable),
+  );
+
+  if (untraced.length > 0) {
+    return `invented ${violationLabel} sentences not traceable to filled form fields`;
+  }
+
+  return null;
+}
+
+function protokolsAnamnezeHasContent(serialized: string): boolean {
+  const value = getFieldValue(serialized, "II Īsa anamnēze/katamnēze");
+  return value !== null && value !== "" && value !== "—";
+}
+
+function protokolsMentalHasContent(serialized: string): boolean {
+  return serialized.split("\n").some((line) => {
+    const trimmed = line.trim();
+    if (!PROTOKOLS_MENTAL_LABEL_PREFIX.test(trimmed)) {
+      return false;
+    }
+    const colon = trimmed.indexOf(":");
+    if (colon <= 0) {
+      return false;
+    }
+    const value = trimmed.slice(colon + 1).trim();
+    return value !== "" && value !== "—" && !isPlaceholderOnly(value);
+  });
+}
+
+function protokolsTaktikaHasContent(serialized: string): boolean {
+  return /XIII Tālākā taktika:\s*(?!—\s*$).+/im.test(serialized);
 }
 
 function validatePirmreizejais(
@@ -120,10 +263,17 @@ function validatePirmreizejais(
   }
 
   if (
-    fieldHasContent(serialized, "VIZĪTES IEMESLS") &&
+    anyFieldHasContent(serialized, VIZITE_FORM_LABELS) &&
     !hasSection(summary, "Vizītes iemesls")
   ) {
     violations.push("missing Vizītes iemesls section");
+  }
+
+  if (fieldHasContent(serialized, "SŪDZAS")) {
+    const sudzas = getFieldValue(serialized, "SŪDZAS");
+    if (sudzas && !summary.toLowerCase().includes(sudzas.toLowerCase())) {
+      violations.push("missing form sūdzības in summary");
+    }
   }
 
   if (
@@ -131,6 +281,17 @@ function validatePirmreizejais(
     hasSection(summary, "Anamnēze no pacienta")
   ) {
     violations.push("invented Anamnēze section when form anamnēze fields are empty");
+  }
+
+  const anamnezeTraceViolation = validateSectionSentencesTraceToForm(
+    summary,
+    "Anamnēze no pacienta",
+    serialized,
+    ANAMNEZE_FORM_LABELS,
+    "anamnēze",
+  );
+  if (anamnezeTraceViolation) {
+    violations.push(anamnezeTraceViolation);
   }
 
   if (
@@ -158,6 +319,17 @@ function validatePirmreizejais(
     violations.push(
       "invented Psihiskais stāvoklis section when form mental-status fields are empty",
     );
+  }
+
+  const psihiskaisTraceViolation = validateSectionSentencesTraceToForm(
+    summary,
+    "Psihiskais stāvoklis",
+    serialized,
+    PSIHISKAS_FORM_LABELS,
+    "psihiskais stāvoklis",
+  );
+  if (psihiskaisTraceViolation) {
+    violations.push(psihiskaisTraceViolation);
   }
 
   if (
@@ -218,6 +390,31 @@ function validatePirmreizejais(
     violations.push("invented Neiroloģiski section when form field is empty");
   }
 
+  if (fieldHasContent(serialized, "PĀRRUNĀTS AR PACIENTU")) {
+    const parrunats = getFieldValue(serialized, "PĀRRUNĀTS AR PACIENTU");
+    if (
+      parrunats &&
+      !summary.toLowerCase().includes(parrunats.toLowerCase())
+    ) {
+      violations.push("missing form pārrunāts ar pacientu in summary");
+    }
+  }
+
+  const { phq9, gad7 } = phqGadScores(serialized);
+  if (phq9 && !summary.includes(phq9)) {
+    violations.push("missing PHQ9 score in summary");
+  }
+  if (gad7 && !summary.includes(gad7)) {
+    violations.push("missing GAD7 score in summary");
+  }
+
+  if (
+    anyFieldHasContent(serialized, TAKTIKA_FORM_LABELS) &&
+    !hasSection(summary, "Taktika")
+  ) {
+    violations.push("missing Taktika section when form taktika fields are filled");
+  }
+
   if (
     /Diagnoze:/i.test(summary) &&
     !fieldHasContent(serialized, "DIAGNOZE") &&
@@ -260,6 +457,40 @@ function validateProtokols(serialized: string, summary: string): string[] {
     !fieldHasContent(serialized, "XI DIAGNOZE")
   ) {
     violations.push("invented Diagnoze section");
+  }
+
+  if (
+    !protokolsAnamnezeHasContent(serialized) &&
+    hasSection(summary, "Anamnēze no pacienta")
+  ) {
+    violations.push("invented Anamnēze section when protokols anamnēze is empty");
+  }
+
+  if (protokolsAnamnezeHasContent(serialized)) {
+    const anamneze = getFieldValue(serialized, "II Īsa anamnēze/katamnēze");
+    if (
+      anamneze &&
+      hasSection(summary, "Anamnēze no pacienta") &&
+      !summary.toLowerCase().includes(anamneze.toLowerCase())
+    ) {
+      violations.push("missing protokols anamnēze in summary");
+    }
+  }
+
+  if (
+    !protokolsMentalHasContent(serialized) &&
+    hasSection(summary, "Psihiskais stāvoklis")
+  ) {
+    violations.push(
+      "invented Psihiskais stāvoklis section when protokols mental-status is empty",
+    );
+  }
+
+  if (
+    !protokolsTaktikaHasContent(serialized) &&
+    hasSection(summary, "Taktika")
+  ) {
+    violations.push("invented Taktika section when protokols taktika is empty");
   }
 
   return violations;

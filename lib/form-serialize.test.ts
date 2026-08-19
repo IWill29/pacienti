@@ -115,6 +115,19 @@ describe("serializePirmreizejaisPacients", () => {
 });
 
 describe("serializeProtokols", () => {
+  it("serializes anamnēze on one line for parser compatibility", () => {
+    const data = {
+      ...emptyProtokols(),
+      anamneze: "Īsa anamnēze teksts.",
+    };
+
+    const serialized = serializeProtokols(data);
+
+    expect(serialized).toContain(
+      "II Īsa anamnēze/katamnēze: Īsa anamnēze teksts.",
+    );
+  });
+
   it("includes parvertesanas ideju veidi when checked", () => {
     const data = {
       ...emptyProtokols(),

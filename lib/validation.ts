@@ -63,21 +63,28 @@ export function validateSummaryRequest(body: unknown): ValidationResult {
     return { ok: false, error: "Empty input" };
   }
 
-  if (formType === "pirmreizejais") {
+  try {
+    if (formType === "pirmreizejais") {
+      const data = formData as unknown as PirmreizejaisPacientsData;
+      if (!data.pacientaDzimums) {
+        return { ok: false, error: "Invalid form data" };
+      }
+
+      return {
+        ok: true,
+        formType,
+        serialized: serializePirmreizejaisPacients(data),
+      };
+    }
+
     return {
       ok: true,
       formType,
-      serialized: serializePirmreizejaisPacients(
-        formData as unknown as PirmreizejaisPacientsData,
-      ),
+      serialized: serializeProtokols(formData as unknown as ProtokolsData),
     };
+  } catch {
+    return { ok: false, error: "Invalid form data" };
   }
-
-  return {
-    ok: true,
-    formType,
-    serialized: serializeProtokols(formData as unknown as ProtokolsData),
-  };
 }
 
 /** @deprecated Legacy single-field validation kept for compatibility. */

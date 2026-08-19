@@ -172,6 +172,8 @@ export function PirmreizejaisPacientsForm() {
           />
         </DocLine>
 
+        <DocLine label="SŪDZAS" {...noteProps("sudzibas")} />
+
         <DocSectionTitle>Anamnēze no pacienta</DocSectionTitle>
 
         <DocLine label="DZEMDĪBAS" {...noteProps("dzemdibasVeids")}>
@@ -995,8 +997,6 @@ export function PirmreizejaisPacientsForm() {
             }
           />
         </DocLine>
-
-        <DocLine label="SŪDZAS" {...noteProps("sudzibas")} />
 
         <DocLine label="UZMANĪBA" {...noteProps("uzmaniba")}>
           <DocRadio

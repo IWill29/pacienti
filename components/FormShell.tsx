@@ -18,7 +18,8 @@ export function SummaryPanel({
   summary,
   isLoading,
   errorMessage,
-}: SummaryPanelProps) {
+  source,
+}: SummaryPanelProps & { source?: "canonical" | "ai" | null }) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -54,6 +55,11 @@ export function SummaryPanel({
 
       {summary && (
         <div className="rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-[0_4px_20px_-2px_rgb(0_0_0_/_0.08)] sm:p-6">
+          {source === "canonical" && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              Kopsavilkums no formas datiem (AI nav pieejams vai netika izmantots).
+            </div>
+          )}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold text-zinc-900">Kopsavilkums</h2>
             <button
@@ -91,14 +97,27 @@ export function FormShell({
   wide = false,
 }: FormShellProps) {
   const [summary, setSummary] = useState("");
+  const [summarySource, setSummarySource] = useState<"canonical" | "ai" | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (formType === "pirmreizejais") {
+      const data = formData as { pacientaDzimums?: string };
+      if (!data.pacientaDzimums) {
+        setErrorMessage("Lūdzu, norādiet pacienta dzimumu.");
+        return;
+      }
+    }
+
     setIsLoading(true);
     setErrorMessage("");
     setSummary("");
+    setSummarySource(null);
 
     try {
       const response = await fetch("/api/summarize", {
@@ -109,6 +128,7 @@ export function FormShell({
 
       const data = (await response.json()) as {
         summary?: string;
+        source?: "canonical" | "ai";
         error?: string;
       };
 
@@ -120,6 +140,7 @@ export function FormShell({
       }
 
       setSummary(data.summary);
+      setSummarySource(data.source ?? null);
     } catch {
       setErrorMessage("Neizdevās ģenerēt kopsavilkumu. Mēģiniet vēlreiz.");
     } finally {
@@ -154,6 +175,7 @@ export function FormShell({
         summary={summary}
         isLoading={isLoading}
         errorMessage={errorMessage}
+        source={summarySource}
       />
     </div>
   );

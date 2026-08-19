@@ -79,6 +79,7 @@ export function serializePirmreizejaisPacients(
       })}`,
       piez.vizitesIemesls,
     ),
+    appendPiezime(`SŪDZAS: ${piez.sudzibas || "—"}`, undefined),
     "",
     "ANAMNĒZE",
     appendPiezime(
@@ -322,7 +323,6 @@ export function serializePirmreizejaisPacients(
       })}`,
       piez.stastijums,
     ),
-    appendPiezime(`SŪDZAS: ${piez.sudzibas || "—"}`, undefined),
     appendPiezime(
       `UZMANĪBA: ${labelOrDash(data.uzmaniba, {
         noturiga: "Uzmanība noturīga",
@@ -427,8 +427,14 @@ export function serializePirmreizejaisPacients(
         .join(" ") || "—"}`,
       piez.taktikaUzraudziba,
     ),
-    appendPiezime("2. IKDIENĀ:", piez.taktikaIkdiena),
-    appendPiezime("3. MEDIKAMENTOZĀ TERAPIJA:", piez.taktikaMedikamenti),
+    appendPiezime(
+      `2. IKDIENĀ: ${piez.taktikaIkdiena.trim() || "—"}`,
+      undefined,
+    ),
+    appendPiezime(
+      `3. MEDIKAMENTOZĀ TERAPIJA: ${piez.taktikaMedikamenti.trim() || "—"}`,
+      undefined,
+    ),
     appendPiezime(
       `4. PSIHOLOĢISKAIS ATBALSTS: ${labelOrDash(data.taktikaPsiholoģija, {
         psihologisks_atbalsts: "Psiholoģisks atbalsts",
@@ -488,8 +494,7 @@ export function serializeProtokols(data: ProtokolsData): string {
     `6. Lietotās zāles: ${data.lietotasZales.nav ? "nav" : data.lietotasZales.ir ? `ir, kādas: ${data.lietotasZales.apraksts}` : "—"}`,
     `7. Suicīda mēģinājumi: ${data.suicidaMeginajumi.nav ? "nav" : data.suicidaMeginajumi.ir ? `ir, kādi: ${data.suicidaMeginajumi.apraksts}` : "—"}`,
     "",
-    "II Īsa anamnēze/katamnēze:",
-    data.anamneze || "—",
+    `II Īsa anamnēze/katamnēze: ${data.anamneze || "—"}`,
     "",
     "III Sūdzības, psihiskais stāvoklis:",
     `1. Apziņa: ${data.apzina || "—"}`,

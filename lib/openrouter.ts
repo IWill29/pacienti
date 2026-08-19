@@ -1,6 +1,7 @@
 import { assembleSummary } from "@/lib/assemble-summary";
 import { assembleCanonicalSummary } from "@/lib/canonical-summary";
 import { getSummaryPrompt } from "@/lib/summary-prompts";
+import { sanitizeSummaryMarkdown } from "@/lib/sanitize-summary";
 import {
   getOpenRouterResponseFormat,
   parseSummaryJson,
@@ -14,8 +15,16 @@ import type { FormType } from "@/lib/types/forms";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const MODEL = "openai/gpt-4o-mini";
+const FETCH_TIMEOUT_MS = 30_000;
 /** Few polish attempts, then always fall back to the form-based summary. */
 const MAX_SUMMARY_ATTEMPTS = 2;
+
+export type SummarySource = "canonical" | "ai";
+
+export type SummaryGenerationResult = {
+  summary: string;
+  source: SummarySource;
+};
 
 type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -44,7 +53,7 @@ async function callOpenRouter(
   apiKey: string,
   messages: ChatMessage[],
   formType: FormType,
-): Promise<string> {
+): Promise<string | null> {
   let response: Response;
   try {
     response = await fetch(OPENROUTER_URL, {
@@ -52,7 +61,8 @@ async function callOpenRouter(
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://pacienti.vercel.app",
+        "HTTP-Referer":
+          process.env.OPENROUTER_HTTP_REFERER ?? "https://pacienti.vercel.app",
         "X-Title": "Pacienti",
       },
       body: JSON.stringify({
@@ -62,6 +72,7 @@ async function callOpenRouter(
         max_tokens: 4096,
         response_format: getOpenRouterResponseFormat(formType),
       }),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
   } catch {
     throw new OpenRouterError("Upstream request failed");
@@ -80,17 +91,26 @@ async function callOpenRouter(
   const content = data.choices?.[0]?.message?.content?.trim();
 
   if (!content) {
-    throw new OpenRouterError("Empty response");
+    return null;
   }
 
   return content;
 }
 
+function canonicalResult(
+  formType: FormType,
+  serializedForm: string,
+): SummaryGenerationResult {
+  const summary = assembleCanonicalSummary(formType, serializedForm);
+  validateSummaryOutput(formType, serializedForm, summary);
+  return { summary, source: "canonical" };
+}
+
 export async function generateSummary(
   formType: FormType,
   serializedForm: string,
-): Promise<string> {
-  const canonical = assembleCanonicalSummary(formType, serializedForm);
+): Promise<SummaryGenerationResult> {
+  const canonical = canonicalResult(formType, serializedForm);
   const apiKey = process.env.OPENROUTER_API_KEY;
 
   if (!apiKey) {
@@ -110,23 +130,29 @@ export async function generateSummary(
     const violations: string[] = [];
 
     try {
-      content = await callOpenRouter(apiKey, messages, formType);
-      const json = parseSummaryJson(formType, content);
-      violations.push(...validateSummaryJsonStructure(formType, json));
+      const responseContent = await callOpenRouter(apiKey, messages, formType);
+      content = responseContent ?? "";
 
-      const summary = assembleSummary(formType, json);
+      if (!content) {
+        violations.push("empty model response");
+      } else {
+        const json = parseSummaryJson(formType, content);
+        violations.push(...validateSummaryJsonStructure(formType, json));
 
-      const textValidation = validateSummaryOutput(
-        formType,
-        serializedForm,
-        summary,
-      );
-      if (!textValidation.ok) {
-        violations.push(...textValidation.violations);
-      }
+        const summary = sanitizeSummaryMarkdown(assembleSummary(formType, json));
 
-      if (violations.length === 0) {
-        return summary;
+        const textValidation = validateSummaryOutput(
+          formType,
+          serializedForm,
+          summary,
+        );
+        if (!textValidation.ok) {
+          violations.push(...textValidation.violations);
+        }
+
+        if (violations.length === 0) {
+          return { summary, source: "ai" };
+        }
       }
     } catch (error) {
       if (error instanceof OpenRouterError) {
@@ -141,15 +167,17 @@ export async function generateSummary(
       return canonical;
     }
 
-    if (content) {
-      messages.push(
-        { role: "assistant", content },
-        {
-          role: "user",
-          content: formatValidationFeedback(violations),
-        },
-      );
-    }
+    messages.push(
+      { role: "assistant", content: content || "{}" },
+      {
+        role: "user",
+        content: formatValidationFeedback(
+          violations.length > 0
+            ? violations
+            : ["empty or invalid model response"],
+        ),
+      },
+    );
   }
 
   return canonical;
